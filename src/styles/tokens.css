@@ -1,0 +1,178 @@
+/* ==========================================================================
+   Tokens: type scale, moods, depth bands.
+
+   Two rules govern this file:
+   - Three type sizes exist site-wide. Not four.
+   - A depth band sets atmosphere, stacking and motion amplitude in one
+     place. Individual objects never override those values; that
+     consistency is what makes the scene read as a place rather than a set of
+     stickers. Object *scale* is deliberately not a band property -- it comes
+     from explicit per-object sizes in content.json, so it can be tuned per
+     painting without fighting the band.
+   ========================================================================== */
+
+:root {
+  /* -- type ------------------------------------------------------------- */
+  --type-sm: 11px;
+  --type-md: 12px;
+  --type-lg: 14px;
+
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", monospace;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    "Times New Roman", serif;
+
+  --tracking: 0.02em;
+
+  /* -- stacking ---------------------------------------------------------
+     Light and grain grade the artwork and must never reach the text: every
+     tinted layer sits below --z-label, and every piece of type above it. */
+  --z-light: 400;
+  --z-grain: 450;
+  --z-label: 620;
+  --z-chrome: 650;
+  --z-dialog: 800;
+
+  /* -- rhythm ----------------------------------------------------------- */
+  --edge: 30px;
+  --clock: 5.5s; /* every ambient motion shares this period */
+
+  /* -- mood: dawn (default) --------------------------------------------
+     Brighter and warmer than the reference, which sits quite muted. The
+     scene should feel like a good morning. */
+  --paper: #fbf1de;
+  --ink: #4a3a2a;
+  --ink-soft: rgba(74, 58, 42, 0.72);
+  --scene-filter: saturate(1.16) brightness(1.06) contrast(1.02);
+  --grain-opacity: 0.07;
+  --grain-blend: overlay;
+  --scenery-dim: 1;
+  --stars-opacity: 0;
+
+  /* A wide, soft sun in the upper left. Diffuse: the pool reaches far and
+     fades slowly, and the shafts are blurred well past legibility, so the
+     light reads as air rather than as a gradient someone drew. */
+  --light-core: rgba(255, 250, 232, 0.7);
+  --light-mid: rgba(255, 238, 200, 0.3);
+  --light-far: rgba(255, 244, 214, 0.12);
+  --light-origin-x: 4%;
+  --light-origin-y: -10%;
+  --light-reach: 86%;
+  --shaft-opacity: 0.2;
+  --shaft-angle: 24deg;
+  --shaft-blur: 22px;
+  --shaft-colour: rgba(255, 250, 226, 0.5);
+}
+
+:root[data-mood="dusk"] {
+  /* A deep blue night. Darker than the previous slate, which let the paper
+     compete with the artwork instead of receding behind it. */
+  --paper: #141a2a;
+  --ink: rgba(240, 244, 255, 0.96);
+  --ink-soft: rgba(240, 244, 255, 0.66);
+
+  /* Deliberately gentle. The page goes dark; the paintings barely do, so they
+     stand out as the only lit things in the frame. Cooling and a slight
+     contrast lift do the night-time work instead of brightness. */
+  --scene-filter: brightness(0.94) saturate(0.9) contrast(1.06)
+    hue-rotate(-10deg);
+  --grain-opacity: 0.1;
+  --grain-blend: soft-light;
+  /* At night the ground steps back so the three destinations lead. */
+  --scenery-dim: 0.72;
+  --stars-opacity: 1;
+
+  /* Moonlight, much reduced: a small cold source high on the right that
+     picks out edges rather than washing the scene. */
+  --light-core: rgba(198, 218, 255, 0.22);
+  --light-mid: rgba(140, 170, 230, 0.07);
+  --light-far: rgba(120, 150, 210, 0.03);
+  --light-origin-x: 86%;
+  --light-origin-y: -8%;
+  --light-reach: 52%;
+  --shaft-opacity: 0.05;
+  --shaft-angle: -20deg;
+  --shaft-blur: 26px;
+  --shaft-colour: rgba(200, 220, 255, 0.3);
+}
+
+/* -- depth bands -------------------------------------------------------- */
+
+/* Depth is carried by scale and placement only.
+   No blur: these are finished paintings, and softening them reads as a
+   rendering fault rather than as distance. */
+
+.band-foreground {
+  --saturation: 1;
+  --amplitude: 1;
+  --band-z: 300;
+}
+
+.band-midground {
+  --saturation: 0.98;
+  --amplitude: 0.78;
+  --band-z: 200;
+}
+
+.band-distance {
+  --saturation: 0.94;
+  --amplitude: 0.5;
+  --band-z: 100;
+}
+
+/* -- base --------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  /* Objects hinge at their base, the way a plant is rooted in soil. This is
+     the single rule that makes the scene feel grown rather than assembled. */
+  transform-origin: bottom center;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden; /* the scene never scrolls, at any breakpoint */
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--type-md);
+  letter-spacing: var(--tracking);
+  -webkit-font-smoothing: antialiased;
+  transition: background 2.4s ease, color 2.4s ease;
+}
+
+#root {
+  height: 100dvh;
+  position: relative;
+}
+
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-soft);
+  padding-bottom: 1px;
+  transition: border-color 0.3s ease, opacity 0.3s ease;
+}
+
+a:hover {
+  border-color: var(--ink);
+}
+
+:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 4px;
+  border-radius: 2px;
+}

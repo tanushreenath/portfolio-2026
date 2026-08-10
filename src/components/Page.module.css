@@ -1,0 +1,94 @@
+/* A page away from the garden. Same paper, same restraint, no scene. */
+
+.page {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--paper);
+  color: var(--ink);
+  transition: background 2.4s ease, color 2.4s ease;
+  animation: fade-in 0.4s ease both;
+}
+
+.inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 18vh var(--edge) 12vh;
+}
+
+.back {
+  position: fixed;
+  top: var(--edge);
+  left: var(--edge);
+  z-index: 10;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--type-sm);
+  letter-spacing: var(--tracking);
+  /* The only way out of a page, so it holds full ink rather than the muted
+     tone used for passive corner text. */
+  color: var(--ink);
+  opacity: 0.75;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.back:hover { opacity: 1; }
+
+.eyebrow {
+  font-size: var(--type-sm);
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+
+.title {
+  font-size: var(--type-lg);
+  font-weight: 400;
+  margin: 0 0 28px;
+}
+
+.body {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  line-height: 1.65;
+  letter-spacing: 0;
+  margin: 0 0 24px;
+  max-width: 58ch;
+}
+
+.placeholder {
+  margin-top: 40px;
+  padding: 28px 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  font-size: var(--type-sm);
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.item {
+  font-size: var(--type-md);
+  color: var(--ink-soft);
+  padding-left: 16px;
+  position: relative;
+}
+
+.item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 1px;
+  background: var(--ink-soft);
+}

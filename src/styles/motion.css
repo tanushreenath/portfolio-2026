@@ -1,0 +1,202 @@
+/* ==========================================================================
+   Motion.
+
+   Principles, in order:
+   - Everything shares one 4s clock. Objects are de-synchronised with NEGATIVE
+     delays, not with different durations, so nothing beats in unison but
+     everything keeps one rhythm.
+   - Amplitude encodes depth, not speed. Distant things move less, not slower.
+   - Only transform and opacity animate. Nothing here triggers layout or paint.
+   ========================================================================== */
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(var(--sway-angle, 2deg));
+  }
+}
+
+@keyframes hang-swing {
+  0% {
+    transform: rotate(calc(var(--sway-angle, 3deg) * -1));
+  }
+  100% {
+    transform: rotate(var(--sway-angle, 3deg));
+  }
+}
+
+/* Runs at 9s against the scene's 5.5s. Coprime periods never resynchronise, so
+   an object's sway and its breath keep drifting apart -- which reads as alive.
+   On the same clock it would read as a loop. */
+@keyframes breathe {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.011);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Stars breathe rather than blink -- a hard on/off reads as a broken pixel. */
+@keyframes twinkle {
+  0% {
+    opacity: 0.18;
+  }
+  100% {
+    opacity: 0.92;
+  }
+}
+
+@keyframes enter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The scene resolves out of a soft haze rather than snapping in. */
+@keyframes contrast-fade {
+  0% {
+    filter: contrast(0.7);
+  }
+  100% {
+    filter: contrast(1);
+  }
+}
+
+@keyframes load-grain {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: var(--grain-opacity);
+  }
+}
+
+/* Two-step jitter. The steps() is essential -- smooth movement reads as a
+   drifting texture, whereas discrete jumps read as film grain. */
+@keyframes grain-jitter {
+  0% {
+    transform: translate3d(0, 2rem, 0);
+  }
+  10% {
+    transform: translate3d(-1rem, -2rem, 0);
+  }
+  20% {
+    transform: translate3d(-4rem, 1rem, 0);
+  }
+  30% {
+    transform: translate3d(4.5rem, -4.5rem, 0);
+  }
+  40% {
+    transform: translate3d(-1rem, 3.5rem, 0);
+  }
+  50% {
+    transform: translate3d(-4.5rem, -2rem, 0);
+  }
+  60% {
+    transform: translate3d(1rem, 3rem, 0);
+  }
+  70% {
+    transform: translate3d(3.5rem, -4rem, 0);
+  }
+  80% {
+    transform: translate3d(-4.5rem, 0.5rem, 0);
+  }
+  90% {
+    transform: translate3d(3rem, -2.5rem, 0);
+  }
+  100% {
+    transform: translate3d(-3.5rem, 0, 0);
+  }
+}
+
+/* -- presets ------------------------------------------------------------
+   Each sets only an angle; the band's --amplitude scales it. */
+
+/* Amplitudes stay small: enough that a clickable object is visibly alive when
+   you rest your eyes on it, not so much that the scene reads as animated.
+   The band's --amplitude damps this by depth, so the same preset gives 2.6deg
+   on the cluster, 2deg on the amber toadstool and 1.3deg on the well. */
+
+.motion-sway-large {
+  --sway-angle: calc(-6deg * var(--amplitude, 1));
+  animation: sway var(--clock) ease-in-out infinite;
+}
+
+.motion-sway-medium {
+  --sway-angle: calc(3.2deg * var(--amplitude, 1));
+  animation: sway var(--clock) ease-in-out infinite;
+}
+
+.motion-sway-small {
+  --sway-angle: calc(2.6deg * var(--amplitude, 1));
+  animation: sway var(--clock) ease-in-out infinite;
+}
+
+.motion-hang-swing {
+  --sway-angle: calc(1.4deg * var(--amplitude, 1));
+  animation: hang-swing 13s ease-in-out infinite alternate;
+}
+
+.motion-still {
+  animation: none;
+}
+
+/* -- reduced motion -----------------------------------------------------
+   The scene must stay fully legible and navigable with zero movement. Grain
+   remains, but static -- it is texture, not motion. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.15s !important;
+  }
+}
+
+/* -- global animation utilities ------------------------------------------
+   Used by CSS Module components, which cannot reference the keyframes above
+   directly: the module compiler rewrites `animation-name` to a scoped symbol
+   that does not exist here. Per-element timing is set inline where it varies. */
+
+.anim-enter {
+  animation: enter 0.6s both;
+}
+
+.anim-fade-in {
+  animation: fade-in 0.3s ease both;
+}
+
+.anim-breathe {
+  animation: breathe 9s ease-in-out infinite alternate;
+}
+
+.anim-grain {
+  animation: load-grain 1.5s 0.4s forwards, grain-jitter 1s steps(2) infinite;
+}
+
+.anim-twinkle {
+  animation-name: twinkle;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+}

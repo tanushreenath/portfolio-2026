@@ -1,0 +1,30 @@
+/* Only ever visible at dusk. Kept mounted in both moods so the field fades in
+   with the rest of the light rather than appearing all at once. */
+
+.sky {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 46%;
+  z-index: var(--z-light);
+  pointer-events: none;
+  opacity: var(--stars-opacity, 0);
+  transition: opacity 2.4s ease;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fdfbff;
+  box-shadow: 0 0 4px rgba(214, 228, 255, 0.75);
+  /* The twinkle comes from the global .anim-twinkle class; only the per-star
+     delay and duration are inline. A module cannot name a global keyframe. */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star {
+    animation: none !important;
+    opacity: 0.62;
+  }
+}

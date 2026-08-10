@@ -1,0 +1,49 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+
+# TypeScript incremental build state (`tsc -b`, see npm run typecheck)
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Local overrides of any kind (.env.local, *.local, ...)
+*.local
+
+# Claude Code machine-local permissions. .claude/settings.json is shared;
+# settings.local.json holds absolute paths from one machine's sessions.
+.claude/settings.local.json
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Screenshot scratch from scripts/shot.mjs, which writes wherever it is told
+# (the README's example is `out.png`). Root-level only -- src/assets and
+# reference are matched by neither of these.
+/*.png
+
+# Source artwork and the resume PDF: ~18MB of originals kept out of the repo.
+# The working copies that actually ship live in src/assets/objects/.
+reference

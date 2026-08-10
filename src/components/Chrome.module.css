@@ -1,0 +1,226 @@
+/* Everything fixed to the four corners. Text lives only here and in hover
+   reveals -- that restraint is where the negative space comes from. */
+
+.corner {
+  position: fixed;
+  z-index: var(--z-chrome);
+  font-size: var(--type-sm);
+  color: var(--ink);
+  opacity: 0.78;
+  line-height: 1.5;
+  text-shadow:
+    0 0 6px color-mix(in srgb, var(--paper) 92%, transparent),
+    0 0 14px color-mix(in srgb, var(--paper) 75%, transparent);
+  transition: opacity 0.5s ease, color 2.4s ease;
+}
+
+.topLeft    { top: var(--edge); left: var(--edge); }
+.topRight   { top: var(--edge); right: var(--edge); text-align: right; }
+.bottomLeft { bottom: var(--edge); left: var(--edge); }
+.bottomRight{ bottom: var(--edge); right: var(--edge); text-align: right; }
+
+/* -- welcome ---------------------------------------------------------- */
+
+.welcome {
+  max-width: 30ch;
+}
+
+.greeting {
+  font-size: var(--type-lg);
+  color: var(--ink);
+  margin: 0;
+}
+
+.sub {
+  margin: 6px 0 0;
+  opacity: 0.82;
+}
+
+/* Recedes while a visitor is considering an object, so the two never compete
+   for the same attention. */
+.dimmed { opacity: 0.25; }
+
+/* -- mood toggle ------------------------------------------------------ */
+
+.moods {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mood {
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  font: inherit;
+  font-size: var(--type-sm);
+  letter-spacing: var(--tracking);
+  color: var(--ink);
+  opacity: 0.45;
+  cursor: pointer;
+  transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+.mood:hover { opacity: 0.8; }
+
+.moodActive {
+  opacity: 1;
+  color: var(--ink);
+}
+
+/* -- hint -------------------------------------------------------------- */
+
+/* Sits directly under the welcome, in the empty upper-left quadrant. Centred
+   at the bottom it landed on painted stones and became unreadable. */
+.hint {
+  position: fixed;
+  left: var(--edge);
+  top: calc(var(--edge) + 58px);
+  z-index: var(--z-chrome);
+  font-size: var(--type-sm);
+  color: var(--ink);
+  opacity: 0.62;
+  pointer-events: none;
+}
+
+/* -- contact link ------------------------------------------------------ */
+
+.link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--type-sm);
+  letter-spacing: var(--tracking);
+  color: inherit;
+  opacity: 0.85;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.link:hover { opacity: 1; }
+
+/* -- help ---------------------------------------------------------------- */
+
+.helpRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.help {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+  border-radius: 50%;
+  background: none;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.75;
+  cursor: pointer;
+  transition: opacity 0.3s ease, border-color 0.3s ease;
+}
+
+.help:hover {
+  opacity: 1;
+  border-color: currentColor;
+}
+
+/* -- light ---------------------------------------------------------------
+   Sunlight at dawn, moonlight at dusk. Two layers: a soft radial pool where
+   the light source sits, and angled shafts fanning out from it.
+
+   The shafts are a repeating gradient masked by a radial fade, so they are
+   strong near the source and gone by mid-scene. Painting them as discrete
+   elements would give hard ends; the mask is what keeps them atmospheric. */
+
+.light {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-light);
+  pointer-events: none;
+  transition: opacity 2.4s ease;
+}
+
+.pool {
+  position: absolute;
+  inset: 0;
+  /* Three stops rather than two, and a long tail, so the light falls off
+     gradually instead of ending on a visible ring. */
+  background: radial-gradient(
+    circle at var(--light-origin-x) var(--light-origin-y),
+    var(--light-core) 0%,
+    var(--light-mid) 22%,
+    var(--light-far) 48%,
+    transparent var(--light-reach)
+  );
+  mix-blend-mode: screen;
+  filter: blur(12px);
+}
+
+.shafts {
+  position: absolute;
+  inset: -20%;
+  opacity: var(--shaft-opacity);
+  mix-blend-mode: screen;
+  background: repeating-linear-gradient(
+    var(--shaft-angle),
+    transparent 0px,
+    transparent 62px,
+    var(--shaft-colour) 96px,
+    transparent 140px,
+    transparent 210px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--light-origin-x) var(--light-origin-y),
+    #000 0%,
+    rgba(0, 0, 0, 0.5) 30%,
+    transparent 62%
+  );
+  mask-image: radial-gradient(
+    circle at var(--light-origin-x) var(--light-origin-y),
+    #000 0%,
+    rgba(0, 0, 0, 0.5) 30%,
+    transparent 62%
+  );
+  filter: blur(var(--shaft-blur, 12px));
+}
+
+/* -- grain -------------------------------------------------------------
+   The layer that fuses separately-painted assets into one image. Procedural
+   feTurbulence, so it costs no asset and never fails to load. */
+
+.grain {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: var(--z-grain);
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: var(--grain-blend);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.9'/%3E%3C/svg%3E");
+  will-change: transform;
+}
+
+@media (max-width: 767px) {
+  :root { --edge: 18px; }
+
+  .corner { font-size: 10px; }
+  .welcome { max-width: 28ch; }
+
+  /* The corners stay in the corners. A portrait screen draws the garden as a
+     band across the middle of the paper (see Scene.module.css), so no corner
+     lands on artwork and none of them need moving.
+
+     The hint still does: both lines of the welcome wrap at this width, so the
+     block is roughly twice as tall and 58px no longer clears it. */
+  .hint { top: calc(var(--edge) + 112px); }
+}

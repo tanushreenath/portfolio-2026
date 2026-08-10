@@ -1,0 +1,107 @@
+/* One object in the clearing.
+
+   Nested elements, because each owns a different transform and they must not
+   fight:
+     .object   positioning
+     .breath   the idle affordance pulse (interactive objects only)
+     .part     a painting's place within a cluster
+     .sway     the ambient animation
+   Collapsing any two would mean one transform silently overwriting another. */
+
+.object {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  z-index: var(--band-z);
+  /* Centring uses the independent `translate` property, not `transform`.
+     The enter animation animates `transform` with fill-mode both, which would
+     otherwise resolve to `none` and knock every object half a width to the
+     right once the reveal finished. */
+}
+
+.interactive {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* One composition at every size means an object is only ever as large as the
+   screen allows -- on a phone the amber toadstool is drawn about 30px wide,
+   which is a painting worth looking at and a target too small to hit. This
+   grows the hit area to the 44px minimum without touching the artwork, and
+   only where a finger is doing the pointing. */
+@media (pointer: coarse) {
+  .interactive::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    translate: -50% -50%;
+  }
+}
+
+/* Scenery: present but inert. It must never intercept a pointer aimed at an
+   object standing on it. */
+.scenery {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Scenery is held back from the light so the clickable objects read as the
+   figures and the path as the ground. Most visible at dusk. */
+.scenery .image {
+  filter: saturate(var(--saturation, 1)) brightness(var(--scenery-dim, 1));
+  transition: filter 2.4s ease;
+}
+
+.breath {
+  display: block;
+  height: 100%;
+}
+
+/* Absolutely positioned from content inside a cluster; a plain wrapper when a
+   painting stands alone. */
+.part {
+  display: block;
+}
+
+.sway {
+  display: block;
+  will-change: transform;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: saturate(var(--saturation, 1));
+  transition: filter 0.45s ease, transform 0.45s ease;
+}
+
+/* The path is painted receding to the right; this scene reads right to left,
+   so it is mirrored rather than repainted. */
+.flip {
+  transform: scaleX(-1);
+}
+
+/* Hover / focus: a single quiet brightening and the faintest lift. Nothing
+   pauses, nothing jumps -- the ambient sway continues underneath so the object
+   never snaps out of its rhythm. A cluster answers as one, because it is one
+   button: all three toadstools respond together. */
+.interactive:hover .image,
+.interactive:focus-visible .image {
+  filter: saturate(var(--saturation, 1)) brightness(1.05);
+  transform: scale(1.02);
+}
+
+.interactive:hover .flip,
+.interactive:focus-visible .flip {
+  transform: scale(1.02) scaleX(-1);
+}
+
+/* The idle breath and load reveal come from the global .anim-* classes in
+   motion.css; their timing is set inline per object. */

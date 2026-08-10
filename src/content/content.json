@@ -1,0 +1,347 @@
+{
+  "profile": {
+    "name": "Tanushree Nath",
+    "title": "Product Designer",
+    "location": "Bengaluru, Karnataka, India",
+    "welcome": {
+      "greeting": "Hello! I am Tanushree.",
+      "sub": "Product designer. Bengaluru."
+    },
+    "links": [
+      {
+        "label": "Email",
+        "href": "mailto:designbytanushree@gmail.com",
+        "display": "designbytanushree@gmail.com"
+      },
+      {
+        "label": "LinkedIn",
+        "href": "https://www.linkedin.com/in/designbytanushree",
+        "display": "linkedin.com/in/designbytanushree"
+      },
+      {
+        "label": "Portfolio",
+        "href": "https://designbytanushree.framer.ai",
+        "display": "designbytanushree.framer.ai"
+      }
+    ]
+  },
+  "scene": {
+    "moods": [
+      "dawn",
+      "dusk"
+    ],
+    "defaultMood": "dawn",
+    "hintDelayMs": 4000,
+    "hintText": "hover the objects"
+  },
+  "objects": [
+    {
+      "id": "ground",
+      "parts": [
+        {
+          "asset": "path-stones",
+          "delay": 0,
+          "preset": "still",
+          "flip": true
+        }
+      ],
+      "band": "midground",
+      "position": {
+        "x": 52.31,
+        "y": 100
+      },
+      "size": 82.41,
+      "z": 10,
+      "label": {
+        "title": "",
+        "meta": ""
+      }
+    },
+    {
+      "id": "playground",
+      "href": "/playground",
+      "parts": [
+        {
+          "asset": "wishing-well",
+          "delay": 0,
+          "preset": "sway-small"
+        }
+      ],
+      "band": "distance",
+      "position": {
+        "x": 31.22,
+        "y": 31.51
+      },
+      "size": 25.41,
+      "label": {
+        "title": "Playground",
+        "meta": "Experiments · Side work"
+      },
+      "labelSide": "right"
+    },
+    {
+      "id": "about",
+      "href": "/about",
+      "parts": [
+        {
+          "asset": "toadstool-amber",
+          "delay": -3.4,
+          "preset": "sway-small"
+        }
+      ],
+      "band": "midground",
+      "position": {
+        "x": 30.03,
+        "y": 60.61
+      },
+      "size": 7.76,
+      "label": {
+        "title": "About",
+        "meta": "Tanushree Nath"
+      },
+      "labelSide": "left"
+    },
+    {
+      "id": "work",
+      "href": "/work",
+      "aspect": 1.0667,
+      "parts": [
+        {
+          "asset": "toadstool-red",
+          "x": 49.01,
+          "y": 94.04,
+          "w": 58.55,
+          "delay": -0.4,
+          "preset": "sway-small"
+        },
+        {
+          "asset": "toadstool-pink",
+          "x": 24.34,
+          "y": 100,
+          "w": 48.68,
+          "delay": -2.1,
+          "preset": "sway-small"
+        },
+        {
+          "asset": "toadstool-blue",
+          "x": 78.95,
+          "y": 99.65,
+          "w": 42.11,
+          "delay": -3.9,
+          "preset": "sway-small"
+        }
+      ],
+      "band": "foreground",
+      "position": {
+        "x": 72.22,
+        "y": 70.64
+      },
+      "size": 17.59,
+      "label": {
+        "title": "Work",
+        "meta": "Selected projects"
+      },
+      "labelSide": "above"
+    }
+  ],
+  "work": [
+    {
+      "id": "banking-dashboards",
+      "title": "Enterprise Banking Dashboards",
+      "company": "GameChange",
+      "period": "Jan 2025 – Present",
+      "role": "Product Designer",
+      "summary": "Portfolio tracking, KPI monitoring, transaction oversight and support workflows across three enterprise banking products — Bitnudge, Engage and the Ticket Portal.",
+      "metrics": [
+        "18% increase in high-value opportunities pursued",
+        "42% faster access to critical financial insights",
+        "90% cross-platform design consistency"
+      ],
+      "href": "https://www.figma.com/deck/IorkEqc5wERaTduFtrWFkd"
+    },
+    {
+      "id": "influencerbit",
+      "title": "InfluencerBit — Brand & 0→1 MVP",
+      "company": "Restless Monks",
+      "period": "Jun 2021 – Feb 2022",
+      "role": "Junior UX Designer",
+      "summary": "Design and branding for InfluencerBit (now Engagebud), establishing product identity and a cohesive visual language. Research, interaction design and rapid prototyping delivered an MVP inside a three-week sprint.",
+      "metrics": [
+        "14x ROI for clients",
+        "400 orders per campaign on average",
+        "Over 1M impressions per campaign"
+      ],
+      "href": "https://www.notion.so/Empowering-Brands-with-Customer-Advocacy-InfluencerBit-Case-Study-8950452ccff64b04865d3cd17e31fc39"
+    },
+    {
+      "id": "bild-bom",
+      "title": "Bill of Materials Workflow",
+      "company": "Bild",
+      "period": "Nov 2023 – Mar 2024",
+      "role": "Product Designer",
+      "summary": "A ground-up revision of the Bill of Materials workflow for the hardware industry, rebuilt around how engineering teams actually assemble and revise a BOM.",
+      "metrics": [
+        "4x faster BOM creation",
+        "300% increase in BOM visibility",
+        "70% reduction in data entry errors"
+      ],
+      "href": "https://www.figma.com/slides/syHseblvDh4j1Z2QkCBinO/Redefining-Dashboards-for-the-Hardware-Industry-at-Bild?node-id=1-26"
+    },
+    {
+      "id": "bild-design-system",
+      "title": "Design System",
+      "company": "Bild",
+      "period": "Nov 2023 – Mar 2024",
+      "role": "Product Designer",
+      "summary": "A scalable design system for Bild — standardising patterns, accelerating feature delivery and holding visual consistency across the whole product ecosystem.",
+      "metrics": [
+        "18% increase in client acquisition through refined usability"
+      ],
+      "href": "https://www.figma.com/slides/CgYwduP7U9Gup06E8zAqyf/Creating-Design-System-for-Bild?node-id=1-62"
+    },
+    {
+      "id": "kyc-kyb",
+      "title": "KYC / KYB Onboarding",
+      "company": "GameChange",
+      "period": "Jan 2025 – Present",
+      "role": "Product Designer",
+      "summary": "Mobile-first onboarding and verification — Quick Apply and a Document Verification App — simplifying digital account activation and compliance for SME and banking clients.",
+      "metrics": [
+        "Know Your Customer and Know Your Business flows, end to end"
+      ]
+    },
+    {
+      "id": "shopkey",
+      "title": "Shopkey — Store Builder",
+      "company": "GameChange",
+      "period": "Jan 2025 – Present",
+      "role": "Product Designer",
+      "summary": "A Shopify-style e-commerce store builder letting SMEs launch storefronts far faster than a bespoke build allows.",
+      "metrics": []
+    },
+    {
+      "id": "wasp",
+      "title": "Wasp — AI Customer Service",
+      "company": "GameChange",
+      "period": "Jan 2025 – Present",
+      "role": "Product Designer",
+      "summary": "An AI-driven WhatsApp customer service platform for managing real-time customer engagement.",
+      "metrics": []
+    },
+    {
+      "id": "remittance-admin",
+      "title": "Remittance Admin Interface",
+      "company": "GameChange",
+      "period": "Jan 2025 – Present",
+      "role": "Product Designer",
+      "summary": "Information architecture and workflows for a remittance admin interface — overseeing users, monitoring transactions and configuring campaigns.",
+      "metrics": [
+        "30% cut in admin task completion time"
+      ]
+    },
+    {
+      "id": "thesis",
+      "title": "Gamification in E-commerce",
+      "company": "Thesis",
+      "period": "Jan 2023 – May 2023",
+      "role": "Researcher and Author",
+      "summary": "A mixed-methods study of gamification in e-commerce with 110 participants, using factor analysis and correlation to evaluate engagement, satisfaction and loyalty.",
+      "metrics": [
+        "Engagement and enjoyment improved by over 70%"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "company": "GameChange",
+      "role": "Product Designer",
+      "period": "Jan 2025 – Present",
+      "location": "Remote, Singapore",
+      "bullets": [
+        "Enterprise banking dashboards for portfolio tracking, KPI monitoring, transaction oversight and support workflows.",
+        "Mobile-first KYC and KYB onboarding and verification flows for SME and banking clients.",
+        "Shopkey, an e-commerce store builder, and Wasp, an AI WhatsApp customer service platform.",
+        "Information architecture and workflows for a remittance admin interface."
+      ]
+    },
+    {
+      "company": "Bild",
+      "role": "Product Designer",
+      "period": "Nov 2023 – Mar 2024",
+      "location": "Hyderabad, India",
+      "bullets": [
+        "Revamped the Bill of Materials workflow, driving operational efficiency across engineering teams.",
+        "Product dissection to refine overall UX and UI, strengthening customer trust through usability.",
+        "Architected and rolled out a scalable design system across the product ecosystem."
+      ]
+    },
+    {
+      "company": "Restless Monks",
+      "role": "Junior UX Designer",
+      "period": "Jun 2021 – Feb 2022",
+      "location": "Remote, India",
+      "bullets": [
+        "0→1 products in the influencer marketing space, aligning design direction with business strategy.",
+        "Design and branding for InfluencerBit, now Engagebud.",
+        "User research, interaction design and rapid prototyping under tight deadlines."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "B.B.A. in Retail and Fashion Merchandising",
+      "school": "Footwear Design and Development Institute, Hyderabad",
+      "period": "Aug 2020 – Jun 2023",
+      "note": "Gold Medal for highest grade in the 2023 batch — 9.33 CGPA"
+    },
+    {
+      "degree": "UX Design and Evaluation",
+      "school": "HEC Montréal × edX",
+      "period": "2020"
+    },
+    {
+      "degree": "Human Computer Interaction",
+      "school": "Georgia Institute of Technology",
+      "period": "2020"
+    }
+  ],
+  "skills": {
+    "Design": [
+      "Design Systems",
+      "Responsive Design",
+      "User Flows",
+      "Visual Design",
+      "Usability Testing",
+      "Accessibility",
+      "WCAG",
+      "Design Tokens",
+      "Information Architecture",
+      "Product Strategy",
+      "Data Visualisation",
+      "Wireframing",
+      "Rapid Prototyping",
+      "Design QA"
+    ],
+    "Research": [
+      "Mixpanel Analytics",
+      "HotJar Heat Maps",
+      "Persona Hypothesis",
+      "User Interviews",
+      "Journey & Empathy Mapping",
+      "Ethnography Study",
+      "A/B Testing"
+    ],
+    "Tools": [
+      "Figma",
+      "Framer",
+      "ProtoPie",
+      "Adobe Creative Cloud",
+      "Lottie",
+      "Notion",
+      "Claude",
+      "Cursor",
+      "Midjourney",
+      "Nano Banana"
+    ]
+  }
+}

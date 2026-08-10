@@ -1,0 +1,85 @@
+.scene {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--paper);
+  transition: background 2.4s ease;
+}
+
+/* The stage.
+ *
+ * Every object is positioned as a percentage of THIS box, not of the viewport,
+ * and the box has one fixed aspect ratio -- the reference painting's -- at
+ * every screen size. That is the whole responsive strategy: there is no mobile
+ * layout, no breakpoint, and no second set of coordinates. Resizing the window
+ * changes how large the garden is drawn and nothing else, so a phone shows the
+ * same picture as a 5K display, just smaller.
+ *
+ * Sized like `object-fit: contain` -- as wide as the viewport allows without
+ * exceeding the height its aspect implies. Nothing is ever cropped, and the
+ * letterboxing is invisible because the stage and the page share one paper
+ * colour.
+ *
+ * Centred rather than anchored to an edge. On a viewport taller than the stage
+ * -- any phone held upright -- the garden then sits as a band of landscape in
+ * the middle of the paper, with the corner type clear of it above and below.
+ * Anchored to the bottom instead, a portrait screen is three quarters empty
+ * paper with the picture jammed against the bottom edge.
+ *
+ * The mood grade sits here, on the artwork only, never on text -- a filter
+ * heavy enough to sell dusk would also make 11px type unreadable. */
+.artwork {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(100vw, calc(100dvh * var(--stage-aspect)));
+  aspect-ratio: var(--stage-aspect);
+  translate: -50% -50%;
+  filter: var(--scene-filter);
+  transition: filter 2.4s ease;
+  animation: contrast-fade 5s linear forwards;
+}
+
+.blurred .artwork {
+  filter: var(--scene-filter) blur(8px) brightness(0.75);
+  transition: filter 0.5s ease;
+}
+
+.hovering .artwork {
+  /* Everything else recedes a touch when one object is being considered. */
+  --dim: 1;
+}
+
+.label {
+  position: fixed;
+  z-index: var(--z-label);
+  pointer-events: none;
+  max-width: 240px;
+  opacity: 0;
+  text-shadow:
+    0 0 6px color-mix(in srgb, var(--paper) 92%, transparent),
+    0 0 14px color-mix(in srgb, var(--paper) 75%, transparent);
+}
+
+/* .anim-fade-in (motion.css) carries the reveal. */
+
+.labelTitle {
+  font-size: var(--type-md);
+  color: var(--ink);
+  opacity: 0.95;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.labelMeta {
+  font-size: var(--type-sm);
+  color: var(--ink);
+  opacity: 0.68;
+  margin: 2px 0 0;
+  line-height: 1.4;
+}
+
+/* Position comes from the object's measured rect (see Scene.tsx), so the only
+   thing left here is how the reveal arrives. */
