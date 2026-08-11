@@ -10,6 +10,8 @@ export type Band = "foreground" | "midground" | "distance";
 export type Mood = "dawn" | "dusk";
 export type MotionPreset = "sway-large" | "sway-medium" | "sway-small" | "hang-swing" | "still";
 export type Route = "/" | "/work" | "/about" | "/playground";
+/** Which side of the cursor a two-state painting belongs to. */
+export type PartState = "rest" | "hover";
 /** Which side of an object its hover reveal sits on. */
 export type LabelSide = "left" | "right" | "above";
 
@@ -63,6 +65,37 @@ export interface ObjectPart {
    * mean loading an image at the moment the mood changed.
    */
   mood?: Mood;
+  /**
+   * Show this painting on one side of the cursor only.
+   *
+   * The same device as `mood`, answering to hover instead of to the light: the
+   * frog beside the amber toadstool is painted twice, and reaching for the
+   * object it belongs to is what opens its mouth. Both frames stay mounted, so
+   * nothing is fetched at the moment the cursor arrives.
+   *
+   * A part takes `mood` or `showOn`, not both -- they are two claims on the
+   * same opacity.
+   */
+  showOn?: PartState;
+  /**
+   * Dissolve the foot of this painting into the meadow, over this percentage of
+   * its own height.
+   *
+   * Every other object is a cut-out standing ON the field: a toadstool ends at
+   * its stem, and the eye accepts that because a stem is a thing that ends. The
+   * signpost was painted with its own turf and flowers around the post, so it
+   * arrives with a second, harder ground line inside it -- an oval of somebody
+   * else's grass sitting on top of the meadow, and no amount of moving it makes
+   * two ground planes agree.
+   *
+   * Softening the bottom edge is what makes them one. Note this is a dissolve
+   * and not a blur: the bands overhead take depth from scale and placement and
+   * explicitly refuse to blur, because these are finished paintings and
+   * softening one reads as a rendering fault rather than as distance. The same
+   * reasoning applies here, so the painting keeps its focus all the way down and
+   * simply stops being there.
+   */
+  fade?: number;
   /** Mirror horizontally. The path is painted receding to the right; the scene
    *  reads right-to-left, so it is flipped rather than repainted. */
   flip?: boolean;
@@ -71,6 +104,36 @@ export interface ObjectPart {
 export interface ObjectLabel {
   title: string;
   meta: string;
+}
+
+/**
+ * Words painted onto an object, rather than floated beside it.
+ *
+ * A hover label is UI: it appears next to a painting, in the site's own type,
+ * because you reached for something. This is the opposite -- it is part of the
+ * artwork, it is always there, and it takes the light and the night with the
+ * board it is written on.
+ */
+export interface ObjectSign {
+  /** One entry per line, centred. Line breaks are a composition decision, so
+   *  they are set here rather than left to wrapping. */
+  lines: string[];
+  /** What the sign says, read as a sentence. The lettering itself is hidden
+   *  from assistive tech: split into one element per letter for the wiggle, it
+   *  would otherwise be announced letter by letter. */
+  label: string;
+  /**
+   * The painted panel the lettering sits in: centre, and size, as percentages
+   * of the object's own box.
+   *
+   * Measured from the artwork's alpha and colour, not judged by eye -- the
+   * board is the one bright near-neutral region inside the silhouette, and
+   * these are its bounds. Repaint the signpost and they want re-measuring.
+   */
+  panel: { x: number; y: number; w: number; h: number };
+  /** Cap height of the lettering, as a percentage of the object's width, so
+   *  the writing scales with the painting it is on. */
+  size: number;
 }
 
 export interface SceneObjectData {
@@ -96,6 +159,9 @@ export interface SceneObjectData {
    * colour, because it is the only thing at night doing its own lighting.
    */
   lit?: boolean;
+  /** Words painted on this object. Scenery may carry one; it is content, not
+   *  decoration, so it stays in the accessibility tree. */
+  sign?: ObjectSign;
   label: ObjectLabel;
   /** Chosen per object so a reveal never lands on artwork. Default "above". */
   labelSide?: LabelSide;

@@ -1,7 +1,12 @@
 import { useId } from "react";
-import type { ObjectPart, SceneObjectData } from "../types/content";
+import type { ObjectPart, ObjectSign, SceneObjectData } from "../types/content";
 import { assets } from "../assets/registry";
 import styles from "./SceneObject.module.css";
+
+/** Seconds between one letter starting its wiggle and the next. Negative, so
+ *  every letter is already mid-cycle on the scene's shared clock and the sign
+ *  is never caught starting. */
+const LETTER_STAGGER = -0.18;
 
 interface Props {
   data: SceneObjectData;
@@ -26,13 +31,17 @@ function Painting({ part, clustered }: { part: ObjectPart; clustered: boolean })
       }
     : {};
 
-  // A mood-bound painting is always rendered; the mood only decides whether it
-  // is the one you can see. Both states of the lamp therefore sit in the same
-  // place and cross-fade.
-  const moodClass = part.mood ? styles[`only${part.mood === "dusk" ? "Dusk" : "Dawn"}`] : "";
+  // A two-state painting is always rendered; the mood, or the cursor, only
+  // decides which of the pair you can see. Both states of the lamp therefore
+  // sit in the same place and cross-fade, and so do both frogs.
+  const stateClass = part.mood
+    ? styles[`only${part.mood === "dusk" ? "Dusk" : "Dawn"}`]
+    : part.showOn
+      ? styles[`only${part.showOn === "hover" ? "Reached" : "Resting"}`]
+      : "";
 
   return (
-    <span className={`${styles.part} ${moodClass}`} style={positioned}>
+    <span className={`${styles.part} ${stateClass}`} style={positioned}>
       <span
         className={`${styles.sway} motion-${part.preset ?? "sway-small"}`}
         style={{ animationDelay: `${part.delay}s` }}
@@ -41,8 +50,15 @@ function Painting({ part, clustered }: { part: ObjectPart; clustered: boolean })
             mirror and the hover lift apply to both at once and the two can
             never come apart. */}
         <span
-          className={`${styles.plate} ${part.flip ? styles.flip : ""}`}
-          style={{ "--part-stretch": part.stretch ?? 1 } as React.CSSProperties}
+          className={`${styles.plate} ${part.flip ? styles.flip : ""} ${
+            part.fade ? styles.rooted : ""
+          }`}
+          style={
+            {
+              "--part-stretch": part.stretch ?? 1,
+              "--part-fade": part.fade ? `${part.fade}%` : undefined,
+            } as React.CSSProperties
+          }
         >
           <img className={styles.image} src={src} alt="" draggable={false} decoding="async" />
           {/* The wash is a plain block of colour cut to the painting's own
@@ -55,6 +71,60 @@ function Painting({ part, clustered }: { part: ObjectPart; clustered: boolean })
           />
         </span>
       </span>
+    </span>
+  );
+}
+
+/**
+ * Lettering painted onto an object's board.
+ *
+ * Positioned from the panel measured off the artwork, and sized in `cqw` --
+ * percentages of the object's own width -- so the writing is locked to the
+ * painting at every screen size. There is one composition here, not a set of
+ * breakpoints, and type in `px` or `rem` would be the one thing in the garden
+ * that did not scale with it: legible at 1440 and spilling off the board at 500.
+ *
+ * The letters are separate elements because they have to move separately. That
+ * is fine to look at and useless to listen to, so the lettering is hidden and
+ * the sign presents itself as one image with one label.
+ */
+function Sign({ sign }: { sign: ObjectSign }) {
+  let letter = 0;
+
+  return (
+    <span
+      className={styles.signText}
+      role="img"
+      aria-label={sign.label}
+      style={
+        {
+          left: `${sign.panel.x}%`,
+          top: `${sign.panel.y}%`,
+          width: `${sign.panel.w}%`,
+          height: `${sign.panel.h}%`,
+          fontSize: `${sign.size}cqw`,
+        } as React.CSSProperties
+      }
+    >
+      {sign.lines.map((line) => (
+        <span className={styles.signLine} key={line}>
+          {[...line].map((char, i) =>
+            char === " " ? (
+              // A space is not a letter and must not wiggle -- moving it would
+              // move the words either side of it.
+              <span className={styles.signSpace} key={i} />
+            ) : (
+              <span
+                className={`${styles.signLetter} anim-letter`}
+                key={i}
+                style={{ animationDelay: `${(letter++ * LETTER_STAGGER).toFixed(2)}s` }}
+              >
+                {char}
+              </span>
+            )
+          )}
+        </span>
+      ))}
     </span>
   );
 }
@@ -97,16 +167,23 @@ export function SceneObject({
   ));
 
   // Scenery. Not a destination, so not a button, not focusable, not hoverable.
+  //
+  // Hidden from assistive tech unless it says something. A signpost is still
+  // scenery -- it leads nowhere and cannot be clicked -- but "Welcome to Tanu's
+  // Garden" is the first thing the garden says to anyone who arrives, and
+  // hiding it would mean it greeted only the people who can see it. The
+  // paintings inside carry alt="" and stay silent either way.
   if (!data.href) {
     return (
       <div
-        className={`${styles.object} ${styles.scenery} ${
-          data.lit ? styles.lit : ""
+        className={`${styles.object} ${styles.scenery} ${data.lit ? styles.lit : ""} ${
+          data.sign ? styles.signed : ""
         } anim-enter band-${data.band}`}
         style={placement}
-        aria-hidden
+        aria-hidden={data.sign ? undefined : true}
       >
         {paintings}
+        {data.sign && <Sign sign={data.sign} />}
       </div>
     );
   }

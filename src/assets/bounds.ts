@@ -17,6 +17,34 @@ export interface AssetBounds {
 }
 
 export const bounds: Record<string, AssetBounds> = {
+  "frog-closed-light": {
+    "top": 0.0554,
+    "right": 0.9805,
+    "bottom": 0.9788,
+    "left": 0.0482,
+    "aspect": 1.0867
+  },
+  "frog-closed": {
+    "top": 0.0605,
+    "right": 0.9787,
+    "bottom": 0.9657,
+    "left": 0,
+    "aspect": 1.0867
+  },
+  "frog-open-light": {
+    "top": 0.0212,
+    "right": 0.9796,
+    "bottom": 0.9617,
+    "left": 0.0195,
+    "aspect": 1.0867
+  },
+  "frog-open": {
+    "top": 0.0474,
+    "right": 0.9425,
+    "bottom": 0.9808,
+    "left": 0.0315,
+    "aspect": 1.0867
+  },
   "lamp-off": {
     "top": 0.0072,
     "right": 0.9657,
@@ -37,6 +65,13 @@ export const bounds: Record<string, AssetBounds> = {
     "bottom": 0.9551,
     "left": 0.0124,
     "aspect": 1.5
+  },
+  "signpost": {
+    "top": 0.0188,
+    "right": 0.9803,
+    "bottom": 0.9812,
+    "left": 0.0197,
+    "aspect": 0.9551
   },
   "toadstool-amber": {
     "top": 0.0501,
@@ -67,13 +102,6 @@ export const bounds: Record<string, AssetBounds> = {
     "aspect": 0.6667
   },
   "wishing-well": {
-    "top": 0.0146,
-    "right": 1,
-    "bottom": 0.9834,
-    "left": 0,
-    "aspect": 1.0117
-  },
-  "wishing-well2": {
     "top": 0.0146,
     "right": 1,
     "bottom": 0.9834,

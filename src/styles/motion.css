@@ -40,6 +40,31 @@
   }
 }
 
+/* Hand-painted letters, never quite settling. Each letter runs this on the
+   scene's own clock and is offset from its neighbour by a negative delay, so
+   the sign reads as one wave travelling along the words rather than as
+   twenty-four things twitching at once -- the same rule the objects follow, at
+   the scale of a letter.
+
+   Rotation and a little lift, nothing else. Anything that moved a letter
+   sideways would open and close the gaps between them, and letter-spacing that
+   breathes reads as a rendering fault rather than as a painted hand. */
+@keyframes letter-wiggle {
+  0%,
+  100% {
+    transform: rotate(calc(var(--wiggle-angle) * -1)) translateY(0);
+  }
+  25% {
+    transform: rotate(calc(var(--wiggle-angle) * 0.25)) translateY(-0.07em);
+  }
+  50% {
+    transform: rotate(var(--wiggle-angle)) translateY(0);
+  }
+  75% {
+    transform: rotate(calc(var(--wiggle-angle) * -0.25)) translateY(-0.07em);
+  }
+}
+
 @keyframes fade-in {
   0% {
     opacity: 0;
@@ -188,6 +213,23 @@
 
 .anim-breathe {
   animation: breathe 9s ease-in-out infinite alternate;
+}
+
+/* Per-letter timing is set inline, from the letter's place in the sign.
+ *
+ * The one motion here that does NOT run on --clock, and amplitude is why. The
+ * scene's 5.5s and its 2-3deg suit a toadstool: the thing swaying is 200px
+ * tall, so a couple of degrees is several pixels of travel and half a minute of
+ * watching is not too long to see it. A letter is 20px tall, where the same
+ * angle moves its top by less than a pixel -- at that size the rule that makes
+ * the garden calm makes the sign look broken instead. So the letters get an
+ * angle you can see and a clock short enough to see it on, which is also what
+ * separates hand-lettering that has not quite dried from a plant in the wind.
+ * 2.6s against 5.5s never resynchronises, so the sign and the garden it stands
+ * in keep drifting apart rather than beating together. */
+.anim-letter {
+  --wiggle-angle: 5deg;
+  animation: letter-wiggle 7s ease-in-out infinite;
 }
 
 .anim-grain {

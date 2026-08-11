@@ -7,7 +7,10 @@
  * one line here -- never a redesign.
  *
  * Files are unmodified copies of `reference/`, renamed only because the
- * originals contain spaces and live outside the Vite root.
+ * originals contain spaces and live outside the Vite root. The frog is the one
+ * exception: its two frames are separate paintings at slightly different scales
+ * and had to be registered onto one canvas before they could be cross-faded.
+ * See scripts/frogframes.mjs.
  *
  * The `?w=` values are deliberate, not uniform. An object is sized for how
  * large it is actually drawn, at 2x for retina: a midground toadstool occupies
@@ -24,6 +27,9 @@ import pathStones from "./objects/path-stones.png?w=1600&quality=80&format=webp"
 import wishingWell from "./objects/wishing-well.png?w=950&quality=82&format=webp";
 import lampOff from "./objects/lamp-off.png?w=300&quality=82&format=webp";
 import lampOn from "./objects/lamp-on.png?w=300&quality=82&format=webp";
+import frogClosed from "./objects/frog-closed.png?w=320&quality=82&format=webp";
+import frogOpen from "./objects/frog-open.png?w=320&quality=82&format=webp";
+import signpost from "./objects/signpost.png?w=760&quality=82&format=webp";
 
 /**
  * The meadow the garden stands in: sky and clouds above a horizon at 20.8%,
@@ -47,6 +53,17 @@ export const assets: Record<string, string> = {
   // one is visible, so they cross-fade rather than swap. See ObjectPart.mood.
   "lamp-off": lampOff,
   "lamp-on": lampOn,
+
+  // Two states of one frog, on the same principle -- the cursor decides rather
+  // than the mood. See ObjectPart.showOn.
+  "frog-closed": frogClosed,
+  "frog-open": frogOpen,
+
+  // Trimmed to its own silhouette, which the original is not: the painting sits
+  // in the middle of a 1536x1024 field and only fills a fifth of it, so four
+  // fifths of every byte -- and of the box `size` and `position` are measured
+  // against -- was empty margin. Trimmed to the alpha bounds plus 2%.
+  signpost,
 
   // Awaiting artwork -- see docs/asset-prompt-pack.md:
   //   bottle-drink-me, teacup-saucer, pocket-watch, lantern

@@ -11,6 +11,27 @@
      painting without fighting the band.
    ========================================================================== */
 
+/* Schoolbell, the hand that writes on the signpost. Apache 2.0, and served from
+   src/assets/fonts rather than from fonts.googleapis.com: the garden loads no
+   third-party anything, and going out to Google costs two round trips before a
+   glyph appears -- one for the stylesheet, one for the file it names. Latin
+   subset only, 21kB.
+
+   `swap` because the sign is a painting first. The board is legible artwork
+   with or without the hand, so there is no reason to hold the text back while
+   the file arrives; the fallback is the serif stack, which is the closest thing
+   on the machine to ink on wood. */
+@font-face {
+  font-family: "Schoolbell";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/schoolbell-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   /* -- type ------------------------------------------------------------- */
   --type-sm: 11px;
@@ -21,6 +42,9 @@
     "Liberation Mono", monospace;
   --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
     "Times New Roman", serif;
+  /* Only ever used inside the scene, on painted surfaces. This is a hand, not a
+     third type size -- the three above still govern every piece of UI type. */
+  --font-hand: "Schoolbell", var(--font-serif);
 
   --tracking: 0.02em;
 
@@ -102,7 +126,7 @@
      sky gradient that shades it, so the two can never be cropped differently.
      Change the framing here and both follow. */
   --ground-aspect: 1.5;
-  --ground-pos-y: 40%;
+  --ground-pos-y: 20%;
   --ground-filter: saturate(1.04) brightness(1.02) contrast(1);
   --ground-tint: rgba(255, 244, 214, 0.1);
   /* How strongly the sky half of the meadow is darkened. Nothing by day. */
@@ -141,6 +165,18 @@
      is lit by the same sun as everything else, so it takes the same grade. */
   --lit-grade: var(--ground-filter);
   --lit-tint: rgba(16, 24, 48, 0);
+
+  /* Ink on the signpost's board. Warmer and lighter than --ink, because it is
+     not type on paper -- it is paint on weathered wood, and a UI black on a
+     cream board reads as a label stuck to the painting rather than as part of
+     it.
+
+     Deliberately ONE value for both moods. The lettering takes the same grade
+     filter as the painting it sits on (see .signText), so night falls on the
+     ink and the board together and their contrast holds by construction. A
+     second value at dusk would be a second answer to a question the grade has
+     already answered, and the two would drift. */
+  --sign-ink: #6b4f2e;
 
   /* Hover. --object-lift multiplies the resting brightness and
      --object-lift-tint scales back the night wash, together raising a

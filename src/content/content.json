@@ -96,6 +96,41 @@
       }
     },
     {
+      "id": "signpost",
+      "parts": [
+        {
+          "asset": "signpost",
+          "delay": 0,
+          "preset": "still",
+          "fade": 16
+        }
+      ],
+      "band": "midground",
+      "position": {
+        "x": 68,
+        "y": 50
+      },
+      "size": 18,
+      "sign": {
+        "lines": [
+          "Tanu's",
+          "Wonderland"
+        ],
+        "label": "Tanu's Wonderland",
+        "panel": {
+          "x": 62.64,
+          "y": 43.1,
+          "w": 52.41,
+          "h": 25.6
+        },
+        "size": 7
+      },
+      "label": {
+        "title": "",
+        "meta": ""
+      }
+    },
+    {
       "id": "playground",
       "href": "/playground",
       "parts": [
@@ -120,19 +155,41 @@
     {
       "id": "about",
       "href": "/about",
+      "aspect": 0.8133,
       "parts": [
         {
           "asset": "toadstool-amber",
+          "x": 40.98,
+          "y": 100,
+          "w": 81.97,
           "delay": -3.4,
           "preset": "sway-small"
+        },
+        {
+          "asset": "frog-closed",
+          "x": 73.77,
+          "y": 100,
+          "w": 50.82,
+          "delay": 0,
+          "preset": "still",
+          "showOn": "rest"
+        },
+        {
+          "asset": "frog-open",
+          "x": 73.77,
+          "y": 100,
+          "w": 50.82,
+          "delay": 0,
+          "preset": "still",
+          "showOn": "hover"
         }
       ],
       "band": "midground",
       "position": {
-        "x": 30.03,
+        "x": 30.88,
         "y": 60.61
       },
-      "size": 7.76,
+      "size": 9.47,
       "label": {
         "title": "About",
         "meta": "Tanushree Nath"

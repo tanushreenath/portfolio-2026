@@ -81,6 +81,46 @@
 .onlyDawn { opacity: var(--dawn-visible); }
 .onlyDusk { opacity: var(--dusk-visible); }
 
+/* The same pair of stacked frames, answering to the cursor instead of to the
+   light: the frog beside the amber toadstool opens its mouth when you reach for
+   the object it sits in.
+
+   Deliberately far quicker than the lamp's 0.7s, and the reason is what a
+   cross-fade actually does. Two stacked paintings at half opacity composite to
+   0.75, not to 1, so for as long as the fade runs the whole frog is see-through
+   and the grass comes up through it. On a change of light that is invisible,
+   because the lamp is fading over a beat where nothing else is still. Here it
+   would be the most obvious thing on screen. At 0.16s the dip lasts about three
+   frames -- short enough to read as the mouth simply opening, long enough that
+   it is not a cut.
+
+   A mouth opening is also an event rather than a state, which is why this does
+   not want the 0.45s the rest of the hover response takes: the light coming up
+   on the toadstool is the object answering, and the frog is the object
+   reacting. They are not the same gesture and they should not share a clock. */
+.onlyResting,
+.onlyReached {
+  transition: opacity 0.16s ease;
+}
+
+.onlyResting { opacity: 1; }
+.onlyReached { opacity: 0; }
+
+/* :active is here for the finger. A tap cannot hover, but it can press, and the
+   press is the last thing that happens before the page turns -- so on a phone
+   the frog still answers, once, on the way out. */
+.interactive:hover .onlyResting,
+.interactive:focus-visible .onlyResting,
+.interactive:active .onlyResting {
+  opacity: 0;
+}
+
+.interactive:hover .onlyReached,
+.interactive:focus-visible .onlyReached,
+.interactive:active .onlyReached {
+  opacity: 1;
+}
+
 .sway {
   display: block;
   will-change: transform;
@@ -111,6 +151,31 @@
    so it is mirrored rather than repainted. */
 .flip {
   transform: scaleX(-1) scaleY(var(--part-stretch, 1));
+}
+
+/* A painting that came with its own patch of ground, dissolved into the meadow
+   over the bottom --part-fade of its height. See ObjectPart.fade.
+ *
+ * On .plate rather than on .image, for the same reason the mirror and the hover
+ * lift are here: the night wash has to fade with the painting. Masking .image
+ * alone would leave the wash at full strength over ground that was no longer
+ * there, and at dusk the signpost would stand in a rectangle of violet.
+ *
+ * The stop sits just inside the bottom edge, not on it. Assets carry a couple
+ * of percent of transparent margin, so a ramp ending at 100% spends its last
+ * stretch fading nothing and leaves a faint hard edge where the artwork
+ * actually stops. */
+.rooted {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--part-fade, 12%)),
+    transparent 98%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--part-fade, 12%)),
+    transparent 98%
+  );
 }
 
 /* The mood grade. Scenery is taken further down than the destinations -- it
@@ -221,6 +286,69 @@
 .interactive:hover .flip,
 .interactive:focus-visible .flip {
   transform: scale(1.02) scaleX(-1) scaleY(var(--part-stretch, 1));
+}
+
+/* -- lettering ------------------------------------------------------------
+   Words painted onto an object's board. See ObjectSign.
+
+   The object becomes a container so the lettering can be sized in `cqw` --
+   percentages of the object's own width. That is the whole trick: the scene is
+   one composition scaled to the screen rather than a set of breakpoints, so the
+   writing has to scale with the painting it sits on, and no absolute unit can
+   do that. Applied only to objects that carry a sign, since `container-type`
+   brings layout containment with it and nothing else here wants it. */
+.signed {
+  container-type: inline-size;
+}
+
+/* Centred on the panel measured off the artwork, hence the -50%/-50%: content
+   gives x and y as the panel's middle, which is the honest way to describe a
+   hanging board and survives the panel being re-measured.
+
+   Inset from the panel because the painted board has a ragged watercolour edge
+   and lettering run right up to it would look printed rather than brushed.
+
+   The grade is the same one .image takes, on the same 2.4s clock, so night
+   falls on the ink and on the board it is painted on together. Without it the
+   words would stay at full strength over a board dropping to 0.72 brightness --
+   the lettering would appear to glow as the sun went down. */
+.signText {
+  position: absolute;
+  translate: -50% -50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 6%;
+  font-family: var(--font-hand);
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--sign-ink);
+  text-align: center;
+  text-wrap: balance;
+  pointer-events: none;
+  filter: var(--scenery-grade);
+  transition: filter 2.4s ease;
+}
+
+.signLine {
+  display: block;
+  white-space: nowrap;
+}
+
+/* Transformable, which an inline box is not -- this is what lets a letter
+   wiggle at all. */
+.signLetter {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* A word space, held open by hand. The letters either side are inline-blocks
+   and a literal space between them would collapse at the line's edges and be
+   subject to the same wiggle as everything else. */
+.signSpace {
+  display: inline-block;
+  width: 0.3em;
 }
 
 /* The idle breath and load reveal come from the global .anim-* classes in
