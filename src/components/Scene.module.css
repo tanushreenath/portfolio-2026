@@ -1,4 +1,9 @@
 .scene {
+  /* Declared here rather than on .artwork so the ground can read it too --
+     on a narrow screen the meadow has to be exactly as wide as the garden it
+     carries, or it stops short partway through a scroll. */
+  --stage-fit: min(100vw, calc(100dvh * var(--stage-aspect)));
+
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -49,8 +54,64 @@
  *
  * The mood grade sits here, on the artwork only, never on text -- a filter
  * heavy enough to sell dusk would also make 11px type unreadable. */
+/* The meadow the garden stands in.
+ *
+ * A separate layer from .artwork, and deliberately so: the garden is a
+ * composition with measured positions and a fixed frame, while this is only
+ * ground. It covers the viewport whatever the stage is doing, which is what
+ * makes the letterboxing disappear -- there is no longer any edge where the
+ * stage stops and something else begins.
+ *
+ * `cover` at `center 22%` puts the painted horizon a little above the point
+ * the path recedes to, so the trail dies out into open field rather than
+ * running exactly to the skyline, which would read as a poster.
+ *
+ * It carries its own filter, not --scene-filter: the mood grade is tuned for
+ * paintings lit from the upper left on paper, and a whole field needs to go
+ * much further to become night. */
+.ground {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* Image and tint are two pseudo-elements of an *unfiltered* box, and that is
+   load-bearing. A `filter` applies to an element's pseudo-element children as
+   well as its own background, so with the image and the tint on one filtered
+   element the night wash was being multiplied by its own brightness(0.4) --
+   rgb(18,26,50) arrived as rgb(7,10,20), and desaturated along with it. The
+   field came out neutral grey no matter what colour was asked for. Filtering
+   only ::before leaves the tint to do its job at full strength. */
+.ground::before,
+.ground::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* The two halves are staggered rather than run together, so the change of
+   light has an order to it: dusk falls over the field first and the colour
+   drains out of it afterwards, the way it actually goes. Run in lockstep the
+   whole thing arrives at once and reads as a cut. Transitions reverse
+   symmetrically, so dawn plays it backwards -- the night lifts, then the
+   colour returns. */
+.ground::before {
+  background: var(--ground-image) center 22% / cover no-repeat;
+  filter: var(--ground-filter);
+  transition: filter 1.6s ease 0.55s;
+}
+
+/* The night wash, and it leads. The filter alone leaves a grey field; the
+   colour has to be put back, and this is the same --paper blue the rest of the
+   page uses. */
+.ground::after {
+  background: var(--ground-tint);
+  transition: background 1.1s ease;
+}
+
 .artwork {
-  --stage-fit: min(100vw, calc(100dvh * var(--stage-aspect)));
   --stage-anchor: 50%;
 
   position: absolute;
@@ -95,13 +156,18 @@
     overscroll-behavior-x: contain;
   }
 
-  .artwork {
-    --stage-anchor: 50%;
-    left: 0;
+  .artwork,
+  .ground {
     width: max(
+      100%,
       calc(var(--stage-fit) * var(--stage-zoom)),
       calc(var(--stage-min) * var(--stage-aspect))
     );
+  }
+
+  .artwork {
+    --stage-anchor: 50%;
+    left: 0;
     translate: 0 calc(-1 * var(--stage-anchor));
   }
 }
@@ -117,9 +183,13 @@
   pointer-events: none;
   max-width: 240px;
   opacity: 0;
+  /* Three stops rather than two. Against flat paper one soft glow was enough;
+     against grass and cloud the type needs a tight core to hold its edges as
+     well as a wide fade to lift it off the field. */
   text-shadow:
-    0 0 6px color-mix(in srgb, var(--paper) 92%, transparent),
-    0 0 14px color-mix(in srgb, var(--paper) 75%, transparent);
+    0 0 3px var(--halo),
+    0 0 8px var(--halo),
+    0 0 18px color-mix(in srgb, var(--halo) 70%, transparent);
 }
 
 /* .anim-fade-in (motion.css) carries the reveal. */

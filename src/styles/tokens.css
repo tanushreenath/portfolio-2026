@@ -62,11 +62,79 @@
   --paper: #fbf1de;
   --ink: #4a3a2a;
   --ink-soft: rgba(74, 58, 42, 0.72);
+  /* ONE CANONICAL FILTER SHAPE, used by every mood-graded layer:
+       saturate() brightness() contrast()
+
+     Every --*-filter and --*-grade token below lists those three functions, in
+     that order, in both moods. This is not tidiness -- it is the only way the
+     mood change animates. A filter list interpolates function by function, and
+     two lists that differ in order or length are not interpolable at all: the
+     value snaps to its target in the first frame and the `transition` is
+     discarded silently. That is exactly what used to happen, which is why
+     turning the lights down read as a jolt while only the blue tint eased.
+
+     Nothing here rotates hue. Night is made by taking light away -- brightness
+     and nothing else moves between the moods -- so a painting is the same
+     colour at dusk as at dawn, only darker. hue-rotate() would be the only way
+     to tint the paintings themselves toward blue, and it is not worth it: it
+     does not shift colours toward a hue, it *rotates* every hue in the image
+     by the same angle, so the red toadstool lands on teal and the blue one on
+     brown, and the transition sweeps the whole wheel on its way there. The
+     blue of night comes from --ground-tint, one flat colour over the field. */
   --scene-filter: saturate(1.16) brightness(1.06) contrast(1.02);
+
+  /* The halo behind corner type and hover reveals.
+     Kept separate from --paper because they used to be the same thing: the
+     garden sat on flat paper, so a glow the colour of the paper was invisible
+     until it crossed a painting. With a meadow behind the type, --paper is no
+     longer what is actually behind it, and a cream glow over grass reads as a
+     smudge. This is the colour the type needs to be lifted off, which at dawn
+     is the pale sky and at dusk is the dark of the field. */
+  --halo: rgba(255, 252, 240, 0.92);
+
+  /* -- ground -------------------------------------------------------------
+     The meadow, graded per mood. It is one painting of a sunlit field, so
+     dusk is made rather than drawn: the light comes down, the colour comes
+     out, and the night blue is laid over the top. */
+  --ground-filter: saturate(1.04) brightness(1.02) contrast(1);
+  --ground-tint: rgba(255, 244, 214, 0.1);
   --grain-opacity: 0.07;
   --grain-blend: overlay;
-  --scenery-dim: 1;
   --stars-opacity: 0;
+
+  /* -- painting grades ----------------------------------------------------
+     Three depths of night, applied per painting rather than to the scene as a
+     whole, because the scene is not one thing. In order of how far each is
+     taken down at dusk:
+
+       --ground-filter   the meadow      -- furthest, it is the dark
+       --scenery-grade   the path stones -- follows the meadow so the trail
+                                            belongs to the field it crosses
+       --object-grade    the three destinations -- least, so they stay the lit
+                                            things in the frame, but tinted so
+                                            they are lit *at night*
+
+     Nothing is graded separately: every painting takes --ground-filter, so the
+     whole clearing is lit by one light and nothing can drift apart. What sets
+     the three destinations apart is not that they are painted brighter -- it
+     is that they light up when you reach for them. See --object-lift.
+
+     The matching --*-tint pair is the night blue, cut to each painting's own
+     silhouette (see .tint in SceneObject.module.css). Both are the same colour
+     as --ground-tint at zero alpha here, so the fade in and out carries no
+     colour of its own. */
+  --scenery-grade: var(--ground-filter);
+  --object-grade: var(--ground-filter);
+  --scenery-tint: rgba(16, 24, 48, 0);
+  --object-tint: rgba(16, 24, 48, 0);
+
+  /* Hover. --object-lift multiplies the resting brightness and
+     --object-lift-tint scales back the night wash, together raising a
+     destination to a readable level while the rest of the clearing stays where
+     it is. At dawn there is nothing to recover from, so the lift is the old
+     quiet 5% and the wash is already at zero alpha. */
+  --object-lift: 1.05;
+  --object-lift-tint: 1;
 
   /* A wide, soft sun in the upper left. Diffuse: the pool reaches far and
      fades slowly, and the shafts are blurred well past legibility, so the
@@ -96,16 +164,45 @@
   --paper: #141a2a;
   --ink: rgba(240, 244, 255, 0.96);
   --ink-soft: rgba(240, 244, 255, 0.66);
+  --halo: rgba(8, 12, 22, 0.86);
 
-  /* Deliberately gentle. The page goes dark; the paintings barely do, so they
-     stand out as the only lit things in the frame. Cooling and a slight
-     contrast lift do the night-time work instead of brightness. */
-  --scene-filter: brightness(0.94) saturate(0.9) contrast(1.06)
-    hue-rotate(-10deg);
+  /* Night over the same field: the light goes, the colour stays. Saturation
+     holds at 1, so the grass is still the green it was painted -- pulling it
+     out was what made the field read grey and dull. The blue comes from the
+     tint alone, kept light enough to darken the meadow rather than repaint
+     it. */
+  --ground-filter: saturate(1) brightness(0.3) contrast(1);
+  --ground-tint: rgba(16, 24, 48, 0.5);
+
+  /* The scene as a whole is left alone at dusk. All the mood work happens per
+     painting below, where scenery and destinations can be taken down by
+     different amounts -- which one filter over the lot could never do. */
+  --scene-filter: saturate(1) brightness(1) contrast(1.04);
   --grain-opacity: 0.1;
   --grain-blend: soft-light;
-  /* At night the ground steps back so the three destinations lead. */
-  --scenery-dim: 0.72;
+
+  /* No --scenery-grade or --object-grade here. Every painting takes
+     --ground-filter and --ground-tint as they are, so the whole clearing --
+     grass, stones, well, toadstools -- goes down to the same night together,
+     and nothing is singled out by being painted brighter than its
+     surroundings.
+
+     What singles the destinations out is the lift below. At rest they are as
+     dark as the field; hovered, they come back up to a readable level, which
+     is a stronger affordance than a permanent glow because it answers the
+     cursor instead of just sitting there.
+
+     The two numbers are a ratio, not a taste: they return a painting to
+     brightness(0.7) with the wash at 0.28 alpha, which is where the
+     destinations used to sit at rest. 0.7/0.3 is the brightness ratio, and the
+     tint scale is set a little under it because the lift brightens the wash
+     along with the painting. Both follow --ground-filter -- change the field's
+     brightness and these want re-deriving. */
+  --scenery-tint: var(--ground-tint);
+  --object-tint: var(--ground-tint);
+  --object-lift: 1.91;
+  --object-lift-tint: 0.24;
+
   --stars-opacity: 1;
 
   /* Moonlight, much reduced: a small cold source high on the right that

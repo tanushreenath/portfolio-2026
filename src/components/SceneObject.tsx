@@ -32,13 +32,20 @@ function Painting({ part, clustered }: { part: ObjectPart; clustered: boolean })
         className={`${styles.sway} motion-${part.preset ?? "sway-small"}`}
         style={{ animationDelay: `${part.delay}s` }}
       >
-        <img
-          className={`${styles.image} ${part.flip ? styles.flip : ""}`}
-          src={src}
-          alt=""
-          draggable={false}
-          decoding="async"
-        />
+        {/* The plate holds the painting and its night wash together, so the
+            mirror and the hover lift apply to both at once and the two can
+            never come apart. */}
+        <span className={`${styles.plate} ${part.flip ? styles.flip : ""}`}>
+          <img className={styles.image} src={src} alt="" draggable={false} decoding="async" />
+          {/* The wash is a plain block of colour cut to the painting's own
+              silhouette: same file, used as a mask. A rectangle would tint the
+              transparent margin every asset carries and put a dark card behind
+              each toadstool. */}
+          <span
+            className={styles.tint}
+            style={{ "--part-src": `url(${src})` } as React.CSSProperties}
+          />
+        </span>
       </span>
     </span>
   );

@@ -8,9 +8,12 @@
   color: var(--ink);
   opacity: 0.78;
   line-height: 1.5;
+  /* See the note on .label in Scene.module.css -- a meadow behind 11px type
+     needs a tighter halo than flat paper did. */
   text-shadow:
-    0 0 6px color-mix(in srgb, var(--paper) 92%, transparent),
-    0 0 14px color-mix(in srgb, var(--paper) 75%, transparent);
+    0 0 3px var(--halo),
+    0 0 8px var(--halo),
+    0 0 18px color-mix(in srgb, var(--halo) 70%, transparent);
   transition: opacity 0.5s ease, color 2.4s ease;
 }
 
@@ -84,6 +87,10 @@
   color: var(--ink);
   opacity: 0.62;
   pointer-events: none;
+  /* Not a .corner, so it carries its own halo. */
+  text-shadow:
+    0 0 3px var(--halo),
+    0 0 8px var(--halo);
 }
 
 /* -- contact link ------------------------------------------------------ */

@@ -1,8 +1,9 @@
 # Wonderland — Tanushree Nath
 
-A single-screen portfolio. One fixed viewport holds a watercolor clearing laid
-out after `reference/Whisical Garden.png` — the same composition at every screen
-size, scaled to fit and never restaged. Three objects are the navigation: the
+A single-screen portfolio. One fixed viewport holds a watercolor clearing — a
+stepping-stone path through a meadow, laid out after `reference/Whisical
+Garden.png` — the same composition at every screen size, scaled to fit and never
+restaged. Three objects are the navigation: the
 toadstool cluster leads to Work, the amber toadstool to About, the wishing well
 to Playground. Hover reveals a whisper of text, a corner toggle shifts the light
 between dawn and dusk, and a `?` in the bottom-right opens a short guide to
@@ -106,6 +107,31 @@ is a media query in `Scene.module.css`:
 Objects also carry a 44px minimum hit area under `@media (pointer: coarse)`,
 since the amber toadstool is painted about 35px wide on a phone.
 
+### The meadow
+
+`src/assets/background.png` — sky and cloud above a horizon at 20.8%, grass and
+flower tufts below — is the field the garden stands in. It is exported from the
+registry as `backgroundImage` rather than through the `assets` record, because it
+is not an object: it is never placed, never hovered, and has no position.
+
+It renders as `.ground`, a layer of its own inside `.scene`, **not** part of
+`.artwork`. That separation is what makes the letterboxing disappear: the stage
+is a framed composition with a fixed aspect, while the meadow simply covers the
+viewport, so there is no longer an edge where the stage stops and paper begins.
+`cover` at `center 22%` places the painted horizon a little above the point the
+path recedes to, so the trail dies out into open field rather than running exactly
+to the skyline.
+
+Under 768px `.ground` takes the same width as `.artwork`, so the field scrolls
+with the garden. Left viewport-width, the grass would sit still while the path
+slid across it. This is why `--stage-aspect` is set on `.scene` and not on
+`.artwork` — both children derive their width from it, and a custom property set
+on a child is not visible to its parent.
+
+Dusk is made rather than drawn, since there is only one painting of a sunlit
+field: `--ground-filter` takes the light down and the colour out, and
+`--ground-tint` lays the night blue over the top.
+
 ## Adding artwork
 
 The nine resume-derived projects live in `content.work`, ready for the /work
@@ -142,7 +168,7 @@ To add one:
   documented on toggles.dev has never been published to npm; `Around` is what
   ships and is what this uses.
 
-Four conventions worth knowing before editing CSS:
+Conventions worth knowing before editing CSS:
 
 - Shared animations live as **global** `.anim-*` classes in
   [src/styles/motion.css](src/styles/motion.css). CSS Modules rewrite
@@ -170,11 +196,73 @@ Four conventions worth knowing before editing CSS:
   `--z-grain: 450`, `--z-label: 620`, `--z-chrome: 650`, `--z-dialog: 800`.
   Every tinted layer sits below `--z-label` and every piece of type above it,
   so nothing ever washes out the text. Corner type and hover labels also carry
-  a `text-shadow` keyed to `--paper`: invisible on plain paper, enough to hold
-  11px type legible where a corner crosses a painted stone.
-- At dusk, `--scenery-dim` holds the path back from the light so the three
-  clickable objects read as the figures and the ground recedes, and a field of
-  stars fades in over the upper sky (`--stars-opacity`).
+  a `text-shadow` keyed to **`--halo`**, which is deliberately *not* `--paper`.
+  They used to be the same value, because the garden sat on flat paper and a
+  glow the colour of the paper was invisible until it crossed a painting. With a
+  meadow behind the type, `--paper` is no longer what is actually behind it and
+  a cream glow over grass reads as a smudge. Measured against the rendered
+  scene, corner type sits at 5.7:1 against bare grass and 6.5–8.6:1 with the
+  halo at dawn, 8.1–15:1 at dusk.
+- **A `filter` applies to an element's pseudo-elements too.** `.ground` carries
+  the meadow on `::before` and the night tint on `::after` for exactly this
+  reason: with both on one filtered box, `--ground-tint` was multiplied by its
+  own `brightness(0.4)` and the field came out neutral grey whatever colour was
+  asked for.
+- **Every mood-graded filter lists the same three functions in the same order**
+  — `saturate() brightness() contrast()` — in both moods. This is not tidiness.
+  A filter list interpolates function by function, and two lists differing in
+  order or length are not interpolable *at all*: the value snaps in the first
+  frame and the `transition` is silently discarded. That is what made going
+  dark read as a jolt while only the tint eased; measured, the ground filter
+  reached its final value within 300ms of a 2.4s transition.
+- **Night is made by removing light, not by moving colour.** Only `brightness`
+  differs between the moods, so every painting is the colour it was painted,
+  just darker. `hue-rotate()` is the only filter that could tint the cut-out
+  paintings themselves toward blue and it is the wrong tool: it rotates every
+  hue by the same angle rather than pulling them toward one, so the red
+  toadstool lands on teal and the blue one on brown, and the transition sweeps
+  the whole colour wheel getting there. The blue of night comes from
+  `--ground-tint` alone — one flat colour, over the field only.
+- **One light over the whole clearing.** At dusk grass, stones, well and
+  toadstools all take `--ground-filter` (`brightness(0.3)`) and `--ground-tint`
+  — nothing is painted brighter than its surroundings, so the scene goes down
+  to night as one thing. Measured at rest: grass `rgb(45,51,48)`, path stone
+  `rgb(38,39,45)`, toadstool cap `rgb(45,29,41)`. A field of stars fades in
+  over the upper sky (`--stars-opacity`).
+- **What marks a destination is that it answers you.** `--object-lift` (1.91)
+  and `--object-lift-tint` (0.24) raise a hovered or focused painting back to
+  `brightness(0.7)` with the wash at 0.28 — measured, a hovered cap lands on
+  `rgb(120,53,54)` against the `rgb(116,53,54)` it used to sit at permanently.
+  The two numbers are a ratio off `--ground-filter`, not a taste: `0.7 / 0.3`
+  for the brightness, and the tint scale a little under it because the lift
+  brightens the wash along with the painting. **Change the field's brightness
+  and both want re-deriving.**
+- A finger cannot hover, so under `@media (hover: none)` the lift is simply
+  always on. It is the whole affordance now that everything rests at the same
+  darkness — without it there would be nothing on a phone at dusk to say which
+  paintings are the way in. The `scale(1.02)` is not carried over; that one
+  answers a cursor, and there is no cursor.
+- **The night blue reaches the paintings through a mask, not a filter.** Each
+  painting carries a `.tint` sibling — a block of `--object-tint` /
+  `--scenery-tint` cut to the painting's own silhouette by using the same image
+  file as a `mask-image`. A rectangle would tint the transparent margin every
+  asset carries and put a dark card behind each toadstool; `hue-rotate` was the
+  only filter alternative and it is not one. The path takes `--ground-tint`
+  itself, so stone and grass land on the same value: measured off the rendered
+  scene, grass `rgb(37,41,34)` against stone `rgb(38,39,45)`.
+- `.tint` is a **sibling** of `.image`, never a child, because `.image` holds
+  the mood grade and a filter applies to its whole subtree. Nested, the wash
+  would be multiplied by the very `brightness(0.3)` it is meant to sit beside,
+  and the path would end up darker than the field it is supposed to match — the
+  same trap as `.ground::after`, one level down. The hover lift and the mirror
+  both moved up to `.plate` for the opposite reason: they must apply to the
+  painting and its wash together, or a rim of untinted painting shows around
+  the edge while the cursor rests.
+- The two halves of the ground are **staggered** — `--ground-tint` over 1.1s,
+  `--ground-filter` over 1.6s after a 0.55s delay — so dusk falls over the
+  field first and the light drains out of it after. Run together the whole
+  change lands at once and reads as a cut. Transitions reverse symmetrically,
+  so dawn plays it backwards.
 - Each object picks its own `labelSide` (`left`/`right`/`above`) in content, so
   a hover reveal never lands on artwork: the well has open paper to its right,
   the amber toadstool to its left, the cluster above it.

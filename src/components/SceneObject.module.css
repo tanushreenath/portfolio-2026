@@ -1,12 +1,16 @@
 /* One object in the clearing.
 
-   Nested elements, because each owns a different transform and they must not
-   fight:
+   Nested elements, because each owns a different transform or filter and they
+   must not fight:
      .object   positioning
      .breath   the idle affordance pulse (interactive objects only)
      .part     a painting's place within a cluster
      .sway     the ambient animation
-   Collapsing any two would mean one transform silently overwriting another. */
+     .plate    the mirror, and the hover lift
+     .image    the mood grade
+     .tint     the night wash, cut to the painting's silhouette
+   Collapsing any two would mean one transform silently overwriting another,
+   or -- for the last three -- one duration having to serve two jobs. */
 
 .object {
   position: absolute;
@@ -51,13 +55,6 @@
   user-select: none;
 }
 
-/* Scenery is held back from the light so the clickable objects read as the
-   figures and the path as the ground. Most visible at dusk. */
-.scenery .image {
-  filter: saturate(var(--saturation, 1)) brightness(var(--scenery-dim, 1));
-  transition: filter 2.4s ease;
-}
-
 .breath {
   display: block;
   height: 100%;
@@ -74,11 +71,18 @@
   will-change: transform;
 }
 
-.image {
+/* Holds the painting and its wash as one thing, and owns everything that moves
+   them: the mirror, and the hover lift. Both sit here rather than on the image
+   so the wash is carried along with it and the two cannot separate.
+ *
+ * Also where the hover *brightening* lives, which is the reason it is not on
+ * .image: one element cannot give one property two durations. Dawn to dusk is
+ * a change of light and takes 2.4s; the hover response takes 0.45s. Both are
+ * `filter` on a painting, so they need two elements. */
+.plate {
   display: block;
-  width: 100%;
-  height: auto;
-  filter: saturate(var(--saturation, 1));
+  position: relative;
+  filter: brightness(1);
   transition: filter 0.45s ease, transform 0.45s ease;
 }
 
@@ -88,14 +92,95 @@
   transform: scaleX(-1);
 }
 
-/* Hover / focus: a single quiet brightening and the faintest lift. Nothing
-   pauses, nothing jumps -- the ambient sway continues underneath so the object
-   never snaps out of its rhythm. A cluster answers as one, because it is one
-   button: all three toadstools respond together. */
-.interactive:hover .image,
-.interactive:focus-visible .image {
-  filter: saturate(var(--saturation, 1)) brightness(1.05);
+/* The mood grade. Scenery is taken further down than the destinations -- it
+   takes the meadow's own filter -- so the path reads as the ground and the
+   three objects as the figures standing on it. */
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: saturate(var(--saturation, 1)) var(--object-grade);
+  transition: filter 2.4s ease;
+}
+
+.scenery .image {
+  filter: saturate(var(--saturation, 1)) var(--scenery-grade);
+}
+
+/* The night wash, cut to the painting's own silhouette by using the same file
+   as a mask -- the one way to tint a cut-out painting without touching its
+   hue. A `hue-rotate` would rotate every colour in the image by the same
+   angle, landing the red toadstool on teal; a plain rectangle would tint the
+   transparent margin every asset carries.
+ *
+ * Deliberately a sibling of .image and not a child, because .image holds the
+ * mood grade and a filter applies to its whole subtree: nested, the wash would
+ * be multiplied by the very brightness(0.3) it is meant to sit beside, and the
+ * path would end up darker than the field it is supposed to match.
+ *
+ * Timed with --ground-tint, not with the grade, so the blue arrives across the
+ * whole scene together. */
+.tint {
+  position: absolute;
+  inset: 0;
+  background: var(--object-tint);
+  pointer-events: none;
+  -webkit-mask-image: var(--part-src);
+  mask-image: var(--part-src);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  opacity: 1;
+  transition: background 1.1s ease, opacity 0.45s ease;
+}
+
+.scenery .tint {
+  background: var(--scenery-tint);
+}
+
+/* Hover / focus: the object comes up out of the dark, and the faintest lift.
+   Nothing pauses, nothing jumps -- the ambient sway continues underneath so the
+   object never snaps out of its rhythm. A cluster answers as one, because it is
+   one button: all three toadstools respond together.
+
+   At rest a destination is exactly as dark as the field around it. This is what
+   distinguishes it: at dawn a quiet 5%, at dusk a return to a readable level.
+
+   The brightening goes on .plate rather than .image because .image carries the
+   2.4s mood grade and one element cannot give one property two durations -- the
+   cursor needs an answer in 0.45s. Putting it here also means the painting and
+   its night wash lift together; on .image alone the wash would stay put and a
+   rim of untinted painting would show for as long as the cursor rested. */
+.interactive:hover .plate,
+.interactive:focus-visible .plate {
+  filter: brightness(var(--object-lift));
   transform: scale(1.02);
+}
+
+/* The wash is pulled back as the painting comes up, or the object would rise
+   into view still wearing the full weight of the night. Scaled by opacity, not
+   by swapping the colour, so it stays on .tint's own fast clock and never
+   fights the 1.1s the tint uses to follow the ground at a mood change. */
+.interactive:hover .tint,
+.interactive:focus-visible .tint {
+  opacity: var(--object-lift-tint);
+  transition: opacity 0.45s ease;
+}
+
+/* A finger cannot hover, so on touch the lift is simply always on.
+   The lift *is* the affordance now that everything rests at the same darkness:
+   without it there would be nothing on a phone at dusk to say which paintings
+   are the way in. The 1.02 scale is deliberately not carried over -- that one
+   answers the cursor, and there is no cursor here. */
+@media (hover: none) {
+  .interactive .plate {
+    filter: brightness(var(--object-lift));
+  }
+
+  .interactive .tint {
+    opacity: var(--object-lift-tint);
+  }
 }
 
 .interactive:hover .flip,

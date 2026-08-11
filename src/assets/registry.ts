@@ -15,12 +15,24 @@
  * its bytes. Widths below are ~2x each object's rendered width at 2560px.
  */
 
+import background from "./background.png?w=1920&quality=74&format=webp";
 import toadstoolRed from "./objects/toadstool-red.png?w=1000&quality=82&format=webp";
 import toadstoolBlue from "./objects/toadstool-blue.png?w=620&quality=82&format=webp";
 import toadstoolPink from "./objects/toadstool-pink.png?w=600&quality=82&format=webp";
 import toadstoolAmber from "./objects/toadstool-amber.png?w=520&quality=82&format=webp";
 import pathStones from "./objects/path-stones.png?w=1600&quality=80&format=webp";
 import wishingWell from "./objects/wishing-well.png?w=1150&quality=82&format=webp";
+
+/**
+ * The meadow the garden stands in: sky and clouds above a horizon at 20.8%,
+ * grass below. Not an object -- it is never placed, never hovered and carries
+ * no position, so it is exported on its own rather than through the registry.
+ *
+ * Upscaled a little on the way out (source is 1536px, and it is drawn the full
+ * width of the viewport) which a soft watercolour wash tolerates where a
+ * detailed painting would not.
+ */
+export const backgroundImage = background;
 
 export const assets: Record<string, string> = {
   "toadstool-red": toadstoolRed,

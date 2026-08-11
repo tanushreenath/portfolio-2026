@@ -1,6 +1,7 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { SceneObjectData } from "../types/content";
 import { bounds } from "../assets/bounds";
+import { backgroundImage } from "../assets/registry";
 import { SceneObject } from "./SceneObject";
 import styles from "./Scene.module.css";
 
@@ -190,11 +191,18 @@ export function Scene({
       ]
         .filter(Boolean)
         .join(" ")}
+      // On .scene, not on .artwork: the stage's width is derived from this and
+      // the ground has to derive the same width, so it must be readable by
+      // both. A custom property set on a child is not visible to its parent.
+      style={{ "--stage-aspect": STAGE_ASPECT } as React.CSSProperties}
     >
       <div
-        className={styles.artwork}
-        style={{ "--stage-aspect": STAGE_ASPECT } as React.CSSProperties}
-      >
+        className={styles.ground}
+        style={{ "--ground-image": `url(${backgroundImage})` } as React.CSSProperties}
+        aria-hidden
+      />
+
+      <div className={styles.artwork}>
         {visible.map((o, i) => (
           <SceneObject
             key={o.id}
