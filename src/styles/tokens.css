@@ -37,6 +37,25 @@
   --edge: 30px;
   --clock: 5.5s; /* every ambient motion shares this period */
 
+  /* -- stage -------------------------------------------------------------
+     How large the garden is drawn. Both are consumed by Scene.module.css;
+     nothing else should read them.
+
+     --stage-zoom draws the composition larger than a plain contain-fit, so
+     the path runs off the left and right edges instead of sitting inside two
+     bands of empty paper. Above ~1.2 the wishing well's roof starts to clip
+     on a 16:9 screen; see the anchoring note in Scene.module.css.
+
+     --stage-min is the smallest the garden is ever drawn, expressed as its
+     HEIGHT. Below it the paintings stop being readable as paintings, so a
+     narrow screen shows part of a proper-sized garden and scrolls, rather than
+     all of a tiny one. Kept in dvh rather than px so it holds its proportion
+     on a 568px phone and an 844px one alike -- and, being under 100dvh, it can
+     never make the garden overflow vertically, where there is no scrolling to
+     recover it. */
+  --stage-zoom: 1.18;
+  --stage-min: 64dvh;
+
   /* -- mood: dawn (default) --------------------------------------------
      Brighter and warmer than the reference, which sits quite muted. The
      scene should feel like a good morning. */
@@ -51,17 +70,24 @@
 
   /* A wide, soft sun in the upper left. Diffuse: the pool reaches far and
      fades slowly, and the shafts are blurred well past legibility, so the
-     light reads as air rather than as a gradient someone drew. */
-  --light-core: rgba(255, 250, 232, 0.7);
-  --light-mid: rgba(255, 238, 200, 0.3);
-  --light-far: rgba(255, 244, 214, 0.12);
+     light reads as air rather than as a gradient someone drew.
+
+     Amber rather than white. Both layers blend with `screen`, and a white
+     shaft screened over cream paper only raises its value -- it flattens the
+     scene into haze. Warming the light gives the beam a hue of its own to
+     separate from the paper, so the air in front of the garden reads as
+     distance instead of fog. The core stays close to white: that is the sun
+     itself, and tinting it too makes the source look like a lamp. */
+  --light-core: rgba(255, 240, 205, 0.72);
+  --light-mid: rgba(255, 196, 122, 0.34);
+  --light-far: rgba(246, 168, 92, 0.16);
   --light-origin-x: 4%;
   --light-origin-y: -10%;
   --light-reach: 86%;
-  --shaft-opacity: 0.2;
+  --shaft-opacity: 0.36;
   --shaft-angle: 24deg;
-  --shaft-blur: 22px;
-  --shaft-colour: rgba(255, 250, 226, 0.5);
+  --shaft-blur: 18px;
+  --shaft-colour: rgba(252, 172, 88, 0.62);
 }
 
 :root[data-mood="dusk"] {

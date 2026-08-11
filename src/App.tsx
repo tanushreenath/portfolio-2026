@@ -103,7 +103,7 @@ export default function App() {
         profile={content.profile}
         dimmed={Boolean(hovered) || contactOpen || helpOpen}
       />
-      <MoodToggle moods={content.scene.moods} current={mood as Mood} onChange={setMood} />
+      <MoodToggle current={mood as Mood} onChange={setMood} />
       <Signature profile={content.profile} onOpen={() => go("/about")} />
       <ContactCorner
         onContact={() => setContactOpen(true)}

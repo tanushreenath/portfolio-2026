@@ -10,9 +10,9 @@ const errs = [];
 p.on("console", m => { if (m.type() === "error") errs.push(m.text()); });
 p.on("pageerror", e => errs.push("PAGEERROR: " + e.message));
 await p.goto(url, { waitUntil: "networkidle" });
-// The toggle only exists in the garden, and dawn is already the default.
+// One toggle, which only exists in the garden; dawn is already the default.
 if (mood && mood !== "dawn") {
-  const toggle = p.getByRole("button", { name: mood, exact: true });
+  const toggle = p.getByRole("button", { name: `Switch to ${mood}` });
   if (await toggle.count()) await toggle.click();
 }
 if (action === "hover") await p.locator("button[aria-labelledby]").first().hover();

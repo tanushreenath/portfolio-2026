@@ -5,7 +5,18 @@
   height: 100dvh;
   overflow: hidden;
   background: var(--paper);
-  transition: background 2.4s ease;
+  /* Two very different speeds, which is why the blur lives here and the mood
+     grade lives on .artwork below. Dawn to dusk is a slow change of light and
+     wants 2.4s; the blur behind a dialog is a UI state and has to be gone the
+     moment the dialog is. Declared on one element they would have to share a
+     duration -- and they did: the blur was set on .artwork, so removing the
+     class dropped back to the 2.4s filter transition and the scene took two
+     and a half seconds to come back into focus. */
+  transition: background 2.4s ease, filter 0.28s ease;
+}
+
+.blurred {
+  filter: blur(8px) brightness(0.75);
 }
 
 /* The stage.
@@ -17,34 +28,82 @@
  * changes how large the garden is drawn and nothing else, so a phone shows the
  * same picture as a 5K display, just smaller.
  *
- * Sized like `object-fit: contain` -- as wide as the viewport allows without
- * exceeding the height its aspect implies. Nothing is ever cropped, and the
- * letterboxing is invisible because the stage and the page share one paper
- * colour.
+ * Sized like `object-fit: contain`, then multiplied by --stage-zoom. A plain
+ * contain-fit leaves the painting's own negative space -- the empty upper
+ * right, the empty lower left -- sitting inside two further bands of empty
+ * paper, and the whole garden reads as a small picture in a large frame.
+ * Drawn past the fit, the path runs off both edges instead, which is what a
+ * ground plane should do.
  *
- * Centred rather than anchored to an edge. On a viewport taller than the stage
- * -- any phone held upright -- the garden then sits as a band of landscape in
- * the middle of the paper, with the corner type clear of it above and below.
- * Anchored to the bottom instead, a portrait screen is three quarters empty
- * paper with the picture jammed against the bottom edge.
+ * The zoom therefore crops, and where it crops is the whole question. Anchored
+ * centrally it eats the top, and the top of this composition is the wishing
+ * well's roof at about 5% -- the one thing that must not be clipped. So on a
+ * viewport wider than the stage, where the fit is height-bound and the zoom
+ * has nowhere to go but off the top and bottom, the stage is pinned to the top
+ * and every pixel of the crop is taken off the bottom. What is lost there is
+ * the near edge of the foreground stone, which reads as the ground continuing
+ * underneath the viewer.
+ *
+ * Everywhere else the fit is width-bound and there is spare height to absorb
+ * the zoom, so the stage is simply centred.
  *
  * The mood grade sits here, on the artwork only, never on text -- a filter
  * heavy enough to sell dusk would also make 11px type unreadable. */
 .artwork {
+  --stage-fit: min(100vw, calc(100dvh * var(--stage-aspect)));
+  --stage-anchor: 50%;
+
   position: absolute;
-  top: 50%;
+  top: var(--stage-anchor);
   left: 50%;
-  width: min(100vw, calc(100dvh * var(--stage-aspect)));
+  width: calc(var(--stage-fit) * var(--stage-zoom));
   aspect-ratio: var(--stage-aspect);
-  translate: -50% -50%;
+  translate: -50% calc(-1 * var(--stage-anchor));
   filter: var(--scene-filter);
   transition: filter 2.4s ease;
   animation: contrast-fade 5s linear forwards;
 }
 
-.blurred .artwork {
-  filter: var(--scene-filter) blur(8px) brightness(0.75);
-  transition: filter 0.5s ease;
+/* Wider than the painting: the fit fills the height exactly, so the zoom can
+   only crop vertically. Pin the top, lose the bottom. */
+@media (min-aspect-ratio: 1728 / 1117) {
+  .artwork { --stage-anchor: 0%; }
+}
+
+/* Narrow screens: the garden overflows and the visitor travels it.
+ *
+ * Fitting a 1.55 landscape into a phone held upright draws it about 250px
+ * tall, which is a garden you cannot see -- the well is the size of a
+ * thumbnail and the amber toadstool is a smudge. So below this width the stage
+ * stops shrinking at --stage-min, is deliberately wider than the screen, and
+ * .scene scrolls sideways: the same composition, entered at the well and
+ * followed along the path to the toadstools.
+ *
+ * --stage-min is a height, so the floor is set in the dimension that cannot
+ * scroll. On a phone held sideways the zoomed fit is already the larger of the
+ * two and the floor never applies -- there the stage still fits and nothing
+ * scrolls.
+ *
+ * Anchored left rather than centred, because overflow to the left of a scroll
+ * container is unreachable: only what spills past the end can be scrolled to.
+ * Entering at the left is also the right reading -- it is where the path
+ * starts. */
+@media (max-width: 767px) {
+  .scene {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+  }
+
+  .artwork {
+    --stage-anchor: 50%;
+    left: 0;
+    width: max(
+      calc(var(--stage-fit) * var(--stage-zoom)),
+      calc(var(--stage-min) * var(--stage-aspect))
+    );
+    translate: 0 calc(-1 * var(--stage-anchor));
+  }
 }
 
 .hovering .artwork {

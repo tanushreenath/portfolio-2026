@@ -44,28 +44,31 @@
 
 .moods {
   display: flex;
-  gap: 10px;
   align-items: center;
+  /* The toggle sits a shade high against the other corners, because its glyph
+     is optically centred in a box taller than the ink inside it. */
+  margin-top: -4px;
 }
 
+/* The @theme-toggles button. Its own stylesheet (css/Around.css) carries the
+   animation and nothing else -- no colour, no size -- so everything that makes
+   it belong to this scene is set here. The SVG is 1em of currentColor, which
+   is why font-size is the size control. */
 .mood {
   border: 0;
   background: none;
-  padding: 2px 0;
-  font: inherit;
-  font-size: var(--type-sm);
-  letter-spacing: var(--tracking);
+  padding: 0;
+  font-size: 21px;
+  line-height: 1;
   color: var(--ink);
-  opacity: 0.45;
+  opacity: 0.62;
   cursor: pointer;
-  transition: opacity 0.3s ease, color 0.3s ease;
+  transition: opacity 0.3s ease, color 2.4s ease;
 }
 
-.mood:hover { opacity: 0.8; }
-
-.moodActive {
+.mood:hover,
+.mood:focus-visible {
   opacity: 1;
-  color: var(--ink);
 }
 
 /* -- hint -------------------------------------------------------------- */

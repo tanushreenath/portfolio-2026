@@ -1,6 +1,31 @@
 import { useEffect, useState } from "react";
+import { Around as AroundUntyped } from "@theme-toggles/react";
+import "@theme-toggles/react/css/Around.css";
 import type { Mood, Profile, SceneConfig } from "../types/content";
 import styles from "./Chrome.module.css";
+
+/**
+ * @theme-toggles/react ships a broken `.d.ts`.
+ *
+ * Its props are declared as a `Pick<>` over a hand-written union of ~280 React
+ * prop names, generated against an older @types/react. Three of those names --
+ * `placeholder`, `onPointerEnterCapture`, `onPointerLeaveCapture` -- no longer
+ * exist in @types/react 18.3, and `Pick` over a key a type does not have
+ * yields a *required* property of an error type. So the component cannot be
+ * rendered at all without passing three props that do not exist.
+ *
+ * The runtime component is fine; only the declaration is wrong. This restates
+ * the props we actually use, which is also the honest surface: if the library
+ * is ever swapped out, this is the contract to satisfy.
+ */
+const Around = AroundUntyped as unknown as React.FC<{
+  className?: string;
+  toggled?: boolean;
+  onToggle?: (toggled: boolean) => void;
+  duration?: number;
+  title?: string;
+  "aria-label"?: string;
+}>;
 
 /** The fixed corner furniture: welcome, mood, signature, contact, grain, hint. */
 
@@ -24,32 +49,36 @@ export function Welcome({ profile, dimmed }: { profile: Profile; dimmed: boolean
   );
 }
 
+/**
+ * Dawn and dusk, as a sun that draws in its rays and becomes a moon.
+ *
+ * `Around` comes from @theme-toggles/react. The `Spin` toggle this was
+ * specified from is documented on toggles.dev but has never been published to
+ * npm -- no release of the package exports it -- and `Around` is the nearest
+ * thing that ships. It draws in `currentColor` at `1em`, so it inherits the
+ * mood's ink and is sized by font-size alone.
+ *
+ * Held controlled: `toggled` follows the mood, so the icon can never disagree
+ * with the scene, including when the mood is restored from storage on load.
+ */
 export function MoodToggle({
-  moods,
   current,
   onChange,
 }: {
-  moods: Mood[];
   current: Mood;
   onChange: (m: Mood) => void;
 }) {
+  const dusk = current === "dusk";
   return (
-    <div
-      className={`${styles.corner} ${styles.topRight} ${styles.moods}`}
-      role="group"
-      aria-label="Light"
-    >
-      {moods.map((m) => (
-        <button
-          key={m}
-          type="button"
-          className={`${styles.mood} ${m === current ? styles.moodActive : ""}`}
-          aria-pressed={m === current}
-          onClick={() => onChange(m)}
-        >
-          {m}
-        </button>
-      ))}
+    <div className={`${styles.corner} ${styles.topRight} ${styles.moods}`}>
+      <Around
+        className={styles.mood}
+        toggled={dusk}
+        onToggle={(on) => onChange(on ? "dusk" : "dawn")}
+        duration={750}
+        aria-label={dusk ? "Switch to dawn" : "Switch to dusk"}
+        title={dusk ? "Switch to dawn" : "Switch to dusk"}
+      />
     </div>
   );
 }

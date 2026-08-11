@@ -166,10 +166,18 @@ export function Scene({
     };
 
     place();
-    // The rect is measured, not declared, so a resize while an object is held
-    // would otherwise leave its reveal behind at the old size.
+    // The rect is measured, not declared, so anything that moves the object
+    // under a held reveal has to re-place it: a resize, or -- on a narrow
+    // screen, where the garden is wider than the window -- scrolling the
+    // scene sideways. Focusing an off-screen object scrolls it into view, so
+    // this fires on keyboard travel too.
+    const scroller = ref.current;
     window.addEventListener("resize", place);
-    return () => window.removeEventListener("resize", place);
+    scroller?.addEventListener("scroll", place, { passive: true });
+    return () => {
+      window.removeEventListener("resize", place);
+      scroller?.removeEventListener("scroll", place);
+    };
   }, [active]);
 
   return (
