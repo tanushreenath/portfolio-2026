@@ -21,7 +21,9 @@ import toadstoolBlue from "./objects/toadstool-blue.png?w=620&quality=82&format=
 import toadstoolPink from "./objects/toadstool-pink.png?w=600&quality=82&format=webp";
 import toadstoolAmber from "./objects/toadstool-amber.png?w=520&quality=82&format=webp";
 import pathStones from "./objects/path-stones.png?w=1600&quality=80&format=webp";
-import wishingWell from "./objects/wishing-well.png?w=1150&quality=82&format=webp";
+import wishingWell from "./objects/wishing-well.png?w=950&quality=82&format=webp";
+import lampOff from "./objects/lamp-off.png?w=300&quality=82&format=webp";
+import lampOn from "./objects/lamp-on.png?w=300&quality=82&format=webp";
 
 /**
  * The meadow the garden stands in: sky and clouds above a horizon at 20.8%,
@@ -41,6 +43,10 @@ export const assets: Record<string, string> = {
   "toadstool-amber": toadstoolAmber,
   "path-stones": pathStones,
   "wishing-well": wishingWell,
+  // Two states of one lamp. Both are always in the DOM; the mood decides which
+  // one is visible, so they cross-fade rather than swap. See ObjectPart.mood.
+  "lamp-off": lampOff,
+  "lamp-on": lampOn,
 
   // Awaiting artwork -- see docs/asset-prompt-pack.md:
   //   bottle-drink-me, teacup-saucer, pocket-watch, lantern

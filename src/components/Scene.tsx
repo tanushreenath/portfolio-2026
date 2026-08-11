@@ -27,6 +27,17 @@ const BAND_ORDER = { foreground: 0, midground: 1, distance: 2 } as const;
 const STAGE_ASPECT = 1728 / 1117;
 
 /**
+ * The lamp's bulb, in stage percentages, and the only source of light at dusk.
+ *
+ * Derived rather than guessed: the centroid of the lit glass sits at 49.5% /
+ * 27.3% of lamp-on.png, and content.json draws the lamp 4.4% wide at x 42.6,
+ * base y 44.3, stretched 1.3. Move the lamp and this wants recomputing.
+ *
+ * Set on .scene as --lamp-x / --lamp-y, which is where the glow reads it from.
+ */
+const LIGHT_ORIGIN = { x: 42.6, y: 17.3 };
+
+/**
  * Distance from the painted edge to its label. One number, every object.
  *
  * 26px reproduces what the About label already looked like: it previously sat
@@ -194,13 +205,21 @@ export function Scene({
       // On .scene, not on .artwork: the stage's width is derived from this and
       // the ground has to derive the same width, so it must be readable by
       // both. A custom property set on a child is not visible to its parent.
-      style={{ "--stage-aspect": STAGE_ASPECT } as React.CSSProperties}
+      style={
+        {
+          "--stage-aspect": STAGE_ASPECT,
+          "--lamp-x": `${LIGHT_ORIGIN.x}%`,
+          "--lamp-y": `${LIGHT_ORIGIN.y}%`,
+        } as React.CSSProperties
+      }
     >
       <div
         className={styles.ground}
         style={{ "--ground-image": `url(${backgroundImage})` } as React.CSSProperties}
         aria-hidden
-      />
+      >
+        <div className={styles.sky} />
+      </div>
 
       <div className={styles.artwork}>
         {visible.map((o, i) => (
@@ -214,6 +233,12 @@ export function Scene({
           />
         ))}
       </div>
+
+      {/* Both after .artwork, so they act on the paintings as well as on the
+          meadow underneath them -- and the vignette before the glow, so the
+          lamp's light is not dimmed by the dark it is cutting through. */}
+      <div className={styles.vignette} aria-hidden />
+      <div className={styles.glow} aria-hidden />
 
       {active && labelBox && (
         <div

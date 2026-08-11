@@ -26,8 +26,13 @@ function Painting({ part, clustered }: { part: ObjectPart; clustered: boolean })
       }
     : {};
 
+  // A mood-bound painting is always rendered; the mood only decides whether it
+  // is the one you can see. Both states of the lamp therefore sit in the same
+  // place and cross-fade.
+  const moodClass = part.mood ? styles[`only${part.mood === "dusk" ? "Dusk" : "Dawn"}`] : "";
+
   return (
-    <span className={styles.part} style={positioned}>
+    <span className={`${styles.part} ${moodClass}`} style={positioned}>
       <span
         className={`${styles.sway} motion-${part.preset ?? "sway-small"}`}
         style={{ animationDelay: `${part.delay}s` }}
@@ -35,7 +40,10 @@ function Painting({ part, clustered }: { part: ObjectPart; clustered: boolean })
         {/* The plate holds the painting and its night wash together, so the
             mirror and the hover lift apply to both at once and the two can
             never come apart. */}
-        <span className={`${styles.plate} ${part.flip ? styles.flip : ""}`}>
+        <span
+          className={`${styles.plate} ${part.flip ? styles.flip : ""}`}
+          style={{ "--part-stretch": part.stretch ?? 1 } as React.CSSProperties}
+        >
           <img className={styles.image} src={src} alt="" draggable={false} decoding="async" />
           {/* The wash is a plain block of colour cut to the painting's own
               silhouette: same file, used as a mask. A rectangle would tint the
@@ -92,7 +100,9 @@ export function SceneObject({
   if (!data.href) {
     return (
       <div
-        className={`${styles.object} ${styles.scenery} anim-enter band-${data.band}`}
+        className={`${styles.object} ${styles.scenery} ${
+          data.lit ? styles.lit : ""
+        } anim-enter band-${data.band}`}
         style={placement}
         aria-hidden
       >

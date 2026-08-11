@@ -66,6 +66,21 @@
   display: block;
 }
 
+/* A painting that belongs to one mood. Both states stay mounted and stacked,
+   and the mood decides which is visible, so the lamp coming on at dusk is a
+   cross-fade on the same 2.4s clock as the rest of the light rather than a
+   swapped `src` popping into place. */
+.onlyDawn,
+.onlyDusk {
+  /* Delayed at the dusk end by --mood-swap-delay, so the lamp catches partway
+     through dusk falling rather than waiting it out. Going back to dawn the
+     token is 0s and it goes out immediately. */
+  transition: opacity 0.7s ease var(--mood-swap-delay);
+}
+
+.onlyDawn { opacity: var(--dawn-visible); }
+.onlyDusk { opacity: var(--dusk-visible); }
+
 .sway {
   display: block;
   will-change: transform;
@@ -83,13 +98,19 @@
   display: block;
   position: relative;
   filter: brightness(1);
+  /* --part-stretch is the optional vertical stretch (ObjectPart.stretch). It
+     lives here rather than on .image so the night wash stretches with the
+     painting, and it grows upward from the base off the global
+     `transform-origin: bottom center` -- a lamp gets taller, it does not
+     sink. */
+  transform: scaleY(var(--part-stretch, 1));
   transition: filter 0.45s ease, transform 0.45s ease;
 }
 
 /* The path is painted receding to the right; this scene reads right to left,
    so it is mirrored rather than repainted. */
 .flip {
-  transform: scaleX(-1);
+  transform: scaleX(-1) scaleY(var(--part-stretch, 1));
 }
 
 /* The mood grade. Scenery is taken further down than the destinations -- it
@@ -105,6 +126,20 @@
 
 .scenery .image {
   filter: saturate(var(--saturation, 1)) var(--scenery-grade);
+}
+
+/* A painting that is a light source rather than something lit by one, so it is
+   exempt from the night the rest of the clearing takes. It sits *behind* the
+   glow, and if it were graded down with the scenery it would read as a dark
+   silhouette with a bright pool floating in front of it -- the one object at
+   night that should still show its own colour would be the one that does not.
+   Declared after .scenery .image so it wins for scenery that is also lit. */
+.lit .image {
+  filter: saturate(var(--saturation, 1)) var(--lit-grade);
+}
+
+.lit .tint {
+  background: var(--lit-tint);
 }
 
 /* The night wash, cut to the painting's own silhouette by using the same file
@@ -155,7 +190,7 @@
 .interactive:hover .plate,
 .interactive:focus-visible .plate {
   filter: brightness(var(--object-lift));
-  transform: scale(1.02);
+  transform: scale(1.02) scaleY(var(--part-stretch, 1));
 }
 
 /* The wash is pulled back as the painting comes up, or the object would rise
@@ -185,7 +220,7 @@
 
 .interactive:hover .flip,
 .interactive:focus-visible .flip {
-  transform: scale(1.02) scaleX(-1);
+  transform: scale(1.02) scaleX(-1) scaleY(var(--part-stretch, 1));
 }
 
 /* The idle breath and load reveal come from the global .anim-* classes in

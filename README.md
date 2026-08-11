@@ -54,6 +54,57 @@ answer as a single button. Within a cluster, a part's `x`/`y`/`w` are
 percentages of the object's own box (`x` a centre, `y` a base), which is why
 the grouping holds its shape at any size.
 
+Two further fields exist on a part, both used only by the lamp:
+
+- **`mood`** binds a painting to `dawn` or `dusk`. Both states stay mounted and
+  stacked in the same place; the mood only decides which is visible, so the lamp
+  coming on at dusk cross-fades on the same 2.4s clock as the rest of the light.
+  Swapping the `src` instead would pop, and would fetch an image at the moment
+  the mood changed.
+- **`stretch`** scales a painting vertically about its base. It is the one place
+  a painting may leave its own proportions, and it exists because a lamp post is
+  a column — it can be drawn taller without being drawn heavier, where scaling
+  it up with `size` would only make it fat. Anything with a recognisable
+  silhouette should use `size`.
+
+And one on the object: **`lit`** marks a painting as a *source* of light rather
+than something lit by one, exempting it from the night grade the rest of the
+clearing takes. Without it the lamp would be a dark silhouette with a bright
+pool floating in front of it — the one object at night that should still show
+its own colour would be the one that does not.
+
+### The lamp
+
+It stands behind the path (`z: 5`, under the ground plane's `z: 10`), so its
+foot is hidden by a foliage tuft that is part of the path artwork. That tuft's
+extent was measured out of `path-stones.png` rather than eyeballed — stage
+x 40.3–43.6%, y 42.0–44.6% — and the lamp is placed at x 42.6 / y 44.3 to sit
+inside it. Its clearance from the well was checked against the well's *painted*
+edge row by row (it peaks at 39.5%, not the 39.9% its bounding box implies).
+
+Its light is `.glow`: a box the size and position of the stage, drawn as a
+sibling *after* `.artwork`, carrying a blurred radial gradient centred on the
+bulb at stage 42.6% / 17.3% — derived from the lit centroid of `lamp-on.png`
+(49.5% / 27.3% of the image) and the lamp's own placement, so **moving the lamp
+means recomputing `--lamp-x` and `--lamp-y`.** Verified in the browser, the
+gradient's centre lands within 1.3px of the painted bulb.
+
+Two things about that layer are load-bearing:
+
+- It is **not inside `.artwork`**. `mix-blend-mode` blends an element with its
+  nearest ancestor stacking context, and `.artwork` is one because it carries a
+  filter. A glow inside it could only light the paintings, never the meadow they
+  stand in — which is most of what a lamp shines on.
+- It is centred with **negative margins, not `translate`**, because a transform
+  would make that box a stacking context too and isolate the blend all over
+  again.
+
+The light waits for the dark. `--mood-swap-delay` is `2.4s` at the dusk end and
+`0s` at the dawn end, and it times both the glow and the lamp-off/lamp-on
+cross-fade. Measured: going to dusk the ground runs 1.02 → 0.30 over 2.4s with
+the lamp at 0.00 throughout, and only then does it come up (0.58 at 3.0s, 1.00
+by 4.5s). Going back it goes out at once.
+
 `position.y` is the object's **base**, because objects hinge at the bottom like
 a plant rooted in soil. `size` is the final rendered width; the band does not
 scale it further.
@@ -223,6 +274,54 @@ Conventions worth knowing before editing CSS:
   toadstool lands on teal and the blue one on brown, and the transition sweeps
   the whole colour wheel getting there. The blue of night comes from
   `--ground-tint` alone — one flat colour, over the field only.
+- **The paintings carry far less night wash than the ground does**
+  (`0.14` against `0.32` alpha), and that is the difference between a scene
+  that is dark and one that is merely grey. A blue wash at the ground's
+  strength does not darken a painting, it *desaturates* it: the red toadstool
+  came out `rgb(43,37,41)`, a neutral mauve, where the reference has it at
+  `rgb(75,22,27)` and still obviously red.
+
+### Night mode
+
+Tuned against `reference/darkmode-reference.png` by sampling eleven matched
+points in both images and minimising the luminance error, rather than by eye.
+It currently sits at a **mean |Δlum| of 8.1** out of 255, with everything inside
+±7 except two points noted below.
+
+The night is four layers, in paint order:
+
+| layer | at dusk |
+|---|---|
+| the meadow | `brightness(0.2)` + `rgba(10,20,44,0.32)` |
+| the paintings | `brightness(0.32)` + `rgba(10,20,44,0.14)` |
+| `.vignette` | dark closing in at the frame edges |
+| `.glow` | the lamp: a hot core, and a pool on the grass |
+
+The lamp's light is deliberately **two** gradients, because one symmetric circle
+centred on the bulb washed the sky as hard as it lit the ground — the sky came
+out `rgb(87,78,78)` against the `rgb(32,43,58)` it wants. `.glow::before` is a
+small near-white halo at the bulb; `.glow::after` is the far larger warm ellipse
+it throws *down* onto the grass, wider than it is tall because that is the shape
+light makes falling on a plane you are looking across. Above the lamp there is
+now almost nothing, which is what keeps the sky deep and the stars readable.
+
+The dusk moon (`--light-*`) is turned nearly off for the same reason: it was
+competing with the lamp for the top-right of the sky.
+
+**Two known gaps**, both from the same cause: at the lamp's foot the ground is
+~22 too bright, and the amber toadstool ~29 too dark. They sit at almost the
+same distance from the pool's centre, so no radial falloff can fix one without
+worsening the other — the reference lights that toadstool as an *object*, a
+painted highlight rather than a property of the light. Closing it would need a
+per-object light response rather than a single screen layer.
+
+**Percentage margins resolve against the containing block's WIDTH on every
+side, including `margin-top`.** `.glow::after` takes its height as a percentage
+of the stage's *height*, so centring it with `margin-top: -50%` put it ~134px
+too high — the well was lit like noon and the grass below the lamp stayed dark.
+It is centred by offsetting `left`/`top` instead, which each resolve against the
+axis they belong to. `.glow::before` may use margins only because
+`aspect-ratio: 1` makes it square, so half its width in px *is* half its height.
 - **One light over the whole clearing.** At dusk grass, stones, well and
   toadstools all take `--ground-filter` (`brightness(0.3)`) and `--ground-tint`
   — nothing is painted brighter than its surroundings, so the scene goes down

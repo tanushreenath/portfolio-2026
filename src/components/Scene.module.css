@@ -1,8 +1,19 @@
 .scene {
-  /* Declared here rather than on .artwork so the ground can read it too --
-     on a narrow screen the meadow has to be exactly as wide as the garden it
-     carries, or it stops short partway through a scroll. */
+  /* The stage's measurements, declared once here because three children need
+     them: .artwork draws in them, .ground has to be exactly as wide as the
+     garden it carries (or it stops short partway through a scroll on a narrow
+     screen), and .glow has to place a light at a point given in them. */
   --stage-fit: min(100vw, calc(100dvh * var(--stage-aspect)));
+  --stage-w: calc(var(--stage-fit) * var(--stage-zoom));
+  --stage-h: calc(var(--stage-w) / var(--stage-aspect));
+
+  /* .ground's own box, and the height the meadow is actually drawn at inside
+     it. This reproduces `background-size: cover` by hand -- for an image wider
+     than its box, cover scales to the box width, otherwise to its height -- and
+     it exists so the sky gradient on .ground::after can be given the same
+     geometry as the painting it is shading. See the note there. */
+  --ground-w: 100vw;
+  --ground-drawn-h: max(100dvh, calc(var(--ground-w) / var(--ground-aspect)));
 
   position: fixed;
   inset: 0;
@@ -98,17 +109,81 @@
    symmetrically, so dawn plays it backwards -- the night lifts, then the
    colour returns. */
 .ground::before {
-  background: var(--ground-image) center 22% / cover no-repeat;
+  background: var(--ground-image) center var(--ground-pos-y) / cover no-repeat;
   filter: var(--ground-filter);
   transition: filter 1.6s ease 0.55s;
 }
 
-/* The night wash, and it leads. The filter alone leaves a grey field; the
-   colour has to be put back, and this is the same --paper blue the rest of the
-   page uses. */
+/* The night wash over the whole field. The sky's own darkening is a separate
+ * layer, .sky below.
+ *
+ * The meadow is one painting of sky above grass, so the two cannot be graded by
+ * separate filters -- --ground-filter lights both or neither. The sky is taken
+ * down here instead, by a gradient that is opaque to the horizon and clear
+ * below it, leaving the grass at the brightness the rest of the clearing is
+ * drawn at.
+ *
+ * THE GRADIENT IS SIZED AND PLACED LIKE THE PAINTING, NOT LIKE THE ELEMENT,
+ * and that is the whole trick. The horizon sits at a fixed 20.8% of the
+ * *image*, but `cover` crops the image differently in every window, so as a
+ * fraction of the element it wanders -- from 20.8% on a phone held upright to
+ * 12.3% on one held sideways. Stops written against the element therefore fit
+ * one screen and spill dark sky onto the grass, or leave lit sky above the
+ * horizon, on every other. Given --ground-drawn-h and the same
+ * --ground-pos-y as the painting, the gradient is cropped identically and 20.8%
+ * means the horizon everywhere.
+ *
+ * The wash is the background *colour*, so it keeps covering the whole element
+ * however the gradient above it is cropped. The filter alone leaves a grey
+ * field; this is what puts the colour back. */
 .ground::after {
-  background: var(--ground-tint);
-  transition: background 1.1s ease;
+  background-color: var(--ground-tint);
+  /* The stops run past the horizon rather than stopping on it. Ending exactly
+     at 20.8% drew a line across the picture where the shade quit; carried a
+     little way down into the field, the near-horizon grass is shaded too and
+     reads as distance instead of as an edge. */
+  background-image: linear-gradient(
+    to bottom,
+    var(--sky-shade) 0%,
+    var(--sky-shade) 22%,
+    transparent 32%
+  );
+  background-size: 100% var(--ground-drawn-h);
+  background-position: center var(--ground-pos-y);
+  background-repeat: no-repeat;
+  /* Two clocks on one element, which is why the wash and the sky shade are
+     split across background-color and background-image rather than sharing the
+     `background` shorthand. The wash leads on its own 1.1s; the sky darkens on
+     exactly the timing --ground-filter uses below, so the sky and the rest of
+     the painting change colour as one thing. */
+  transition: background-color 1.1s ease, background-image 1.6s ease 0.55s;
+}
+
+/* The sky's darkening, and a real element rather than a third background layer
+ * on .ground::after -- both of its pseudo-elements are already spoken for, and
+ * more importantly this has to fade on `opacity`. Driven as a colour inside a
+ * gradient it could only animate through `background-image`, which does not
+ * interpolate between two gradients: it flips discretely at the halfway mark,
+ * so the sky snapped to night at 1.35s while the rest of the painting was
+ * still turning until 2.15s. Opacity always tweens, so the sky can be given
+ * exactly the clock --ground-filter runs on and arrive with everything else.
+ *
+ * Sized and placed like the painting, not like the element -- see the note on
+ * .ground::before. The stops run past the horizon at 20.8% so the near field is
+ * shaded too and the shade has no visible edge. */
+.sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+      to bottom,
+      #0e081a 0%,
+      #0e081a 22%,
+      transparent 32%
+    )
+    center var(--ground-pos-y) / 100% var(--ground-drawn-h) no-repeat;
+  opacity: var(--sky-shade);
+  transition: opacity 1.6s ease 0.55s;
 }
 
 .artwork {
@@ -117,7 +192,7 @@
   position: absolute;
   top: var(--stage-anchor);
   left: 50%;
-  width: calc(var(--stage-fit) * var(--stage-zoom));
+  width: var(--stage-w);
   aspect-ratio: var(--stage-aspect);
   translate: -50% calc(-1 * var(--stage-anchor));
   filter: var(--scene-filter);
@@ -125,10 +200,124 @@
   animation: contrast-fade 5s linear forwards;
 }
 
+/* The lamp's light.
+ *
+ * A box the size and place of the stage, so a glow can be given a position in
+ * the same percentages every painting uses -- but it is NOT the stage, and it
+ * is not inside it. `mix-blend-mode` blends an element with its nearest
+ * ancestor stacking context, and .artwork is one (it carries a filter). A glow
+ * inside it could therefore only light the paintings, never the meadow they
+ * stand in, which is most of what a lamp shines on.
+ *
+ * So it is a sibling, drawn after .artwork and blending against everything in
+ * .scene beneath it. And it is centred with negative margins rather than
+ * `translate`, because a transform would make *this* box a stacking context
+ * too and isolate the blend all over again. */
+.glow {
+  --stage-anchor: 50%;
+  --stage-anchor-n: 0.5;
+
+  position: absolute;
+  top: var(--stage-anchor);
+  left: 50%;
+  width: var(--stage-w);
+  height: var(--stage-h);
+  margin-left: calc(var(--stage-w) / -2);
+  margin-top: calc(-1 * var(--stage-anchor-n) * var(--stage-h));
+  pointer-events: none;
+}
+
+/* The light itself: a circle centred on the bulb, given in stage percentages.
+ *
+ * Square by `aspect-ratio`, so the gradient stays a circle in a box that is
+ * not one. Percentage margins resolve against the containing block's WIDTH for
+ * top as well as left, and the box is as wide as it is tall, so half the reach
+ * in each direction lands the centre exactly on --lamp-x / --lamp-y. */
+.glow::before,
+.glow::after {
+  content: "";
+  position: absolute;
+  mix-blend-mode: screen;
+  opacity: var(--lamp-glow);
+  /* Held back until the mood change has finished. A lamp does not come on
+     while the sun is still going down; it comes on once it is dark. Only the
+     dusk end carries the delay -- going the other way the token is 0s, so the
+     lamp goes out first and the sun comes up after. */
+  transition: opacity 0.8s ease var(--mood-swap-delay);
+}
+
+/* The halo at the bulb: small and near-white, the source itself. */
+.glow::before {
+  left: var(--lamp-x);
+  top: var(--lamp-y);
+  width: var(--lamp-reach);
+  aspect-ratio: 1;
+  margin-left: calc(var(--lamp-reach) / -2);
+  margin-top: calc(var(--lamp-reach) / -2);
+  background: radial-gradient(
+    circle,
+    var(--lamp-core) 0%,
+    var(--lamp-mid) 26%,
+    var(--lamp-far) 54%,
+    transparent 82%
+  );
+  /* Scaled off the stage so the softness holds at every size. It does two
+     jobs: it diffuses the light so there is no findable edge, and it kills the
+     banding a gradient this shallow would otherwise show. */
+  filter: blur(calc(var(--stage-w) * 0.008));
+}
+
+/* The pool it throws on the grass: far wider, centred below the lamp, and an
+   ellipse rather than a circle -- light falling on a plane you are looking
+   across is always wider than it is tall. Percentage width and height here
+   resolve against the stage box, so the pool keeps its shape at any size. */
+.glow::after {
+  /* Centred by offsetting the edge, NOT by a negative margin. A percentage
+     margin resolves against the containing block's WIDTH on every side --
+     including margin-top -- while this box takes its height as a percentage of
+     the stage's HEIGHT. Half of one is not half of the other, and the pool
+     ended up ~134px too high: the well was lit like noon and the grass below
+     the lamp stayed dark. `left` and `top` each resolve against the axis they
+     belong to, so the arithmetic here is honest.
+     (.glow::before above can use margins precisely because `aspect-ratio: 1`
+     makes it square, so half its width in px *is* half its height.) */
+  left: calc(var(--pool-x) - var(--pool-w) / 2);
+  top: calc(var(--pool-y) - var(--pool-h) / 2);
+  width: var(--pool-w);
+  height: var(--pool-h);
+  background: radial-gradient(
+    ellipse closest-side,
+    var(--pool-core) 0%,
+    var(--pool-mid) 40%,
+    var(--pool-far) 72%,
+    transparent 96%
+  );
+  filter: blur(calc(var(--stage-w) * 0.018));
+}
+
+/* Night closing in at the edges of the frame. Above the artwork so it darkens
+   the paintings too, but below .glow, so the lamp's light reads as punching
+   through it rather than being dimmed by it. */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 78% 86% at 46% 44%,
+    transparent 44%,
+    var(--vignette) 100%
+  );
+  opacity: var(--vignette-opacity);
+  transition: opacity 2.4s ease, background 2.4s ease;
+}
+
 /* Wider than the painting: the fit fills the height exactly, so the zoom can
    only crop vertically. Pin the top, lose the bottom. */
 @media (min-aspect-ratio: 1728 / 1117) {
-  .artwork { --stage-anchor: 0%; }
+  .artwork,
+  .glow { --stage-anchor: 0%; }
+
+  .glow { --stage-anchor-n: 0; }
 }
 
 /* Narrow screens: the garden overflows and the visitor travels it.
@@ -156,19 +345,35 @@
     overscroll-behavior-x: contain;
   }
 
-  .artwork,
-  .ground {
-    width: max(
-      100%,
+  .scene {
+    --stage-w: max(
+      100vw,
       calc(var(--stage-fit) * var(--stage-zoom)),
       calc(var(--stage-min) * var(--stage-aspect))
     );
+    /* The meadow is as wide as the garden here, not as wide as the window, so
+       the sky gradient has to be told the same or it crops against the wrong
+       box and the horizon lands somewhere else. */
+    --ground-w: var(--stage-w);
+  }
+
+  .ground {
+    width: var(--stage-w);
+  }
+
+  .artwork,
+  .glow {
+    --stage-anchor: 50%;
+    left: 0;
   }
 
   .artwork {
-    --stage-anchor: 50%;
-    left: 0;
     translate: 0 calc(-1 * var(--stage-anchor));
+  }
+
+  .glow {
+    --stage-anchor-n: 0.5;
+    margin-left: 0;
   }
 }
 

@@ -17,6 +17,20 @@ export interface AssetBounds {
 }
 
 export const bounds: Record<string, AssetBounds> = {
+  "lamp-off": {
+    "top": 0.0072,
+    "right": 0.9657,
+    "bottom": 0.9949,
+    "left": 0.03,
+    "aspect": 0.238
+  },
+  "lamp-on": {
+    "top": 0.0061,
+    "right": 0.97,
+    "bottom": 0.9969,
+    "left": 0.03,
+    "aspect": 0.238
+  },
   "path-stones": {
     "top": 0.0596,
     "right": 0.9948,
@@ -54,9 +68,16 @@ export const bounds: Record<string, AssetBounds> = {
   },
   "wishing-well": {
     "top": 0.0146,
-    "right": 0.8424,
+    "right": 1,
     "bottom": 0.9834,
-    "left": 0.168,
-    "aspect": 1.5
+    "left": 0,
+    "aspect": 1.0117
+  },
+  "wishing-well2": {
+    "top": 0.0146,
+    "right": 1,
+    "bottom": 0.9834,
+    "left": 0,
+    "aspect": 1.0117
   }
 };

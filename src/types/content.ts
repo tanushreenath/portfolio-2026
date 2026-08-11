@@ -42,9 +42,27 @@ export interface ObjectPart {
   y?: number;
   /** Width, as % of the object's box. Only meaningful in a multi-part object. */
   w?: number;
+  /**
+   * Vertical scale, applied about the painting's base.
+   *
+   * The one place a painting is allowed to leave its own proportions. A lamp
+   * post is a column: it can be drawn taller without being drawn heavier, and
+   * scaling it up uniformly to gain height would only make it fat. Anything
+   * with a recognisable silhouette should be resized with `size` instead.
+   */
+  stretch?: number;
   /** Negative seconds, so parts share one clock but never sway in unison. */
   delay: number;
   preset?: MotionPreset;
+  /**
+   * Show this painting in one mood only.
+   *
+   * Both states stay mounted and the invisible one is faded out, so a lamp
+   * going on at dusk cross-fades with the lamp that is off, on the same clock
+   * as the rest of the light. Swapping the `src` instead would pop, and would
+   * mean loading an image at the moment the mood changed.
+   */
+  mood?: Mood;
   /** Mirror horizontally. The path is painted receding to the right; the scene
    *  reads right-to-left, so it is flipped rather than repainted. */
   flip?: boolean;
@@ -70,6 +88,14 @@ export interface SceneObjectData {
   /** Explicit stacking override. Used by the ground plane, which must sit
    *  behind every object regardless of its band. */
   z?: number;
+  /**
+   * This painting is a source of light, not a thing lit by one.
+   *
+   * It is therefore exempt from the night grade the rest of the clearing
+   * takes: at dusk a lamp is the one object that should still show its own
+   * colour, because it is the only thing at night doing its own lighting.
+   */
+  lit?: boolean;
   label: ObjectLabel;
   /** Chosen per object so a reveal never lands on artwork. Default "above". */
   labelSide?: LabelSide;

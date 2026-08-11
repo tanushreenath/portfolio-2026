@@ -96,8 +96,17 @@
      The meadow, graded per mood. It is one painting of a sunlit field, so
      dusk is made rather than drawn: the light comes down, the colour comes
      out, and the night blue is laid over the top. */
+  /* background.png is 1536x1024, and its painted horizon sits at 20.8% of its
+     own height. Both numbers are consumed by Scene.module.css: --ground-aspect
+     to reproduce `cover` by hand, --ground-pos-y by the painting *and* by the
+     sky gradient that shades it, so the two can never be cropped differently.
+     Change the framing here and both follow. */
+  --ground-aspect: 1.5;
+  --ground-pos-y: 40%;
   --ground-filter: saturate(1.04) brightness(1.02) contrast(1);
   --ground-tint: rgba(255, 244, 214, 0.1);
+  /* How strongly the sky half of the meadow is darkened. Nothing by day. */
+  --sky-shade: 0;
   --grain-opacity: 0.07;
   --grain-blend: overlay;
   --stars-opacity: 0;
@@ -128,6 +137,11 @@
   --scenery-tint: rgba(16, 24, 48, 0);
   --object-tint: rgba(16, 24, 48, 0);
 
+  /* A painting that is itself a light source (SceneObjectData.lit). By day it
+     is lit by the same sun as everything else, so it takes the same grade. */
+  --lit-grade: var(--ground-filter);
+  --lit-tint: rgba(16, 24, 48, 0);
+
   /* Hover. --object-lift multiplies the resting brightness and
      --object-lift-tint scales back the night wash, together raising a
      destination to a readable level while the rest of the clearing stays where
@@ -135,6 +149,63 @@
      quiet 5% and the wash is already at zero alpha. */
   --object-lift: 1.05;
   --object-lift-tint: 1;
+
+  /* Which of a two-state painting is showing. See ObjectPart.mood. */
+  --dawn-visible: 1;
+  --dusk-visible: 0;
+
+  /* -- the lamp -----------------------------------------------------------
+     Where its bulb sits, as stage percentages -- derived, not guessed: the
+     centroid of the lit glass is at 49.5% / 27.3% of lamp-on.png, and the lamp
+     is drawn 4.4% wide at x 45, base y 46, stretched 1.3. Move the lamp in
+     content.json and these want recomputing.
+
+     --mood-swap-delay holds the light back until the change of mood is well
+     under way -- it starts partway through rather than waiting for the end, so
+     the lamp is coming up while the light is still going down. It is 0s here, at the dawn end, so going the other way the lamp goes
+     out first and the sun comes up after. It also times the lamp-off/lamp-on
+     cross-fade, which is the same event seen from the artwork's side. */
+  --lamp-x: 42.6%;
+  --lamp-y: 17.3%;
+  --lamp-reach: 17%;
+  --lamp-glow: 0;
+  --mood-swap-delay: 0s;
+
+  /* The light is two things, because that is what a lantern actually does.
+     One symmetric circle centred on the bulb washed the sky as hard as the
+     ground and left the night looking foggy rather than dark -- the sky came
+     out rgb(87,78,78) against the rgb(32,43,58) it should be.
+
+       --lamp-*      the halo at the bulb itself
+       --pool-*      the far larger pool it throws DOWN onto the grass,
+                     an ellipse centred below the lamp, wider than it is tall
+                     because that is the shape light makes falling on a plane
+
+     Above the lamp there is now almost nothing, which is what keeps the sky
+     deep and the stars readable.
+
+     Orange all the way through, and the blue channel is what does it. Both
+     layers blend with `screen`, which lifts whichever channels the light
+     carries: give it much blue and the pool climbs toward white and reads as
+     mist with a bulb in it. Holding blue far below red keeps a tungsten
+     colour, so the light stays orange as it spreads instead of paling out.
+     Even the core is kept off white for that reason -- a filament reads hot
+     because of what surrounds it, not because it is the brightest pixel. */
+  --lamp-core: rgba(255, 202, 118, 0.95);
+  --lamp-mid: rgba(252, 152, 58, 0.56);
+  --lamp-far: rgba(230, 108, 28, 0.22);
+
+  --pool-x: 37%;
+  --pool-y: 41%;
+  --pool-w: 90%;
+  --pool-h: 48%;
+  --pool-core: rgba(255, 170, 84, 0.46);
+  --pool-mid: rgba(244, 132, 46, 0.36);
+  --pool-far: rgba(208, 92, 24, 0.2);
+
+  /* The dark that closes in at the edges of the frame. Off entirely by day. */
+  --vignette: rgba(4, 8, 18, 0);
+  --vignette-opacity: 0;
 
   /* A wide, soft sun in the upper left. Diffuse: the pool reaches far and
      fades slowly, and the shafts are blurred well past legibility, so the
@@ -159,20 +230,31 @@
 }
 
 :root[data-mood="dusk"] {
-  /* A deep blue night. Darker than the previous slate, which let the paper
-     compete with the artwork instead of receding behind it. */
-  --paper: #141a2a;
-  --ink: rgba(240, 244, 255, 0.96);
-  --ink-soft: rgba(240, 244, 255, 0.66);
-  --halo: rgba(8, 12, 22, 0.86);
+  /* A violet night rather than a blue one. Blue and green are neighbours, so a
+     blue wash over a green field mostly just greys it; violet sits across the
+     wheel from the grass and stays a colour of its own on top of it, which is
+     what lets the night read as a colour rather than as an absence. */
+  --paper: #1b1430;
+  --ink: rgba(244, 240, 255, 0.96);
+  --ink-soft: rgba(244, 240, 255, 0.66);
+  --halo: rgba(14, 8, 26, 0.86);
 
   /* Night over the same field: the light goes, the colour stays. Saturation
      holds at 1, so the grass is still the green it was painted -- pulling it
-     out was what made the field read grey and dull. The blue comes from the
-     tint alone, kept light enough to darken the meadow rather than repaint
-     it. */
-  --ground-filter: saturate(1) brightness(0.3) contrast(1);
-  --ground-tint: rgba(16, 24, 48, 0.5);
+     out was what made the field read grey and dull.
+
+     Brightness now matches every painting in the scene. The whole clearing is
+     drawn at the level a destination used to reach only under the cursor, so
+     the night is carried by the violet wash and by the vignette rather than by
+     taking the light away. */
+  --ground-filter: saturate(1.05) brightness(0.72) contrast(1);
+  --ground-tint: rgba(52, 30, 74, 0.34);
+
+  /* The sky alone goes back down to where the whole meadow used to sit. The
+     grass stays at 0.72 with everything else; only the half above the horizon
+     is taken to roughly a 0.2 brightness, which is what keeps it a night sky
+     over a lit clearing rather than an evenly dim picture. */
+  --sky-shade: 0.76;
 
   /* The scene as a whole is left alone at dusk. All the mood work happens per
      painting below, where scenery and destinations can be taken down by
@@ -181,42 +263,65 @@
   --grain-opacity: 0.1;
   --grain-blend: soft-light;
 
-  /* No --scenery-grade or --object-grade here. Every painting takes
-     --ground-filter and --ground-tint as they are, so the whole clearing --
-     grass, stones, well, toadstools -- goes down to the same night together,
-     and nothing is singled out by being painted brighter than its
-     surroundings.
+  /* Ground, path and destinations all sit at one brightness now -- 0.72, which
+     is exactly where a hovered destination used to land (0.32 x the 2.25 lift).
+     Nothing in the clearing is darker than anything else; what separates them
+     is the wash, which the paintings take at less than half the field's
+     strength.
 
-     What singles the destinations out is the lift below. At rest they are as
-     dark as the field; hovered, they come back up to a readable level, which
-     is a stronger affordance than a permanent glow because it answers the
-     cursor instead of just sitting there.
+     That difference is deliberate and it is the whole reason the tint is kept
+     off the paintings: a wash at the ground's strength does not darken a
+     painting, it *desaturates* it. The red toadstool came out rgb(43,37,41), a
+     neutral mauve, where it should still be obviously red. Colour survives the
+     night. */
+  --scenery-grade: saturate(1) brightness(0.72) contrast(1);
+  --object-grade: saturate(1) brightness(0.72) contrast(1);
+  --scenery-tint: rgba(52, 30, 74, 0.14);
+  --object-tint: rgba(52, 30, 74, 0.056);
 
-     The two numbers are a ratio, not a taste: they return a painting to
-     brightness(0.7) with the wash at 0.28 alpha, which is where the
-     destinations used to sit at rest. 0.7/0.3 is the brightness ratio, and the
-     tint scale is set a little under it because the lift brightens the wash
-     along with the painting. Both follow --ground-filter -- change the field's
-     brightness and these want re-deriving. */
-  --scenery-tint: var(--ground-tint);
-  --object-tint: var(--ground-tint);
-  --object-lift: 1.91;
-  --object-lift-tint: 0.24;
+  /* Back to dawn's quiet 5%. There is no darkness left to recover from, and
+     the old 2.25 stacked on an already-lit painting would take it to 1.62 and
+     blow it out. */
+  --object-lift: 1.05;
+  --object-lift-tint: 1;
+
+  /* The lamp keeps its colour. It is the brightest thing in the scene at
+     night, above even a hovered destination, because it is the only thing at
+     night doing its own lighting -- and it has to hold up behind its own glow
+     rather than becoming a silhouette inside it. Barely any night wash for
+     the same reason. */
+  --lit-grade: saturate(1) brightness(0.95) contrast(1);
+  --lit-tint: rgba(52, 30, 74, 0.04);
+
+  --dawn-visible: 0;
+  --dusk-visible: 1;
+
+  /* The lamp is lit, and waits 2.4s -- the length of the mood change -- before
+     it says so. */
+  --lamp-glow: 1;
+  --mood-swap-delay: 1.1s;
+
+  /* Night closes in at the edges, which is most of what keeps the eye on the
+     lit part of the clearing rather than on the empty grass at the sides. */
+  --vignette: rgba(14, 6, 28, 0.5);
+  --vignette-opacity: 1;
 
   --stars-opacity: 1;
 
-  /* Moonlight, much reduced: a small cold source high on the right that
-     picks out edges rather than washing the scene. */
-  --light-core: rgba(198, 218, 255, 0.22);
-  --light-mid: rgba(140, 170, 230, 0.07);
-  --light-far: rgba(120, 150, 210, 0.03);
+  /* Moonlight, barely there. The lamp is the light source at night now, and a
+     moon pool in the top right competed with it -- it lifted the sky to
+     rgb(47,54,67) where it wants to be rgb(31,43,60), and a washed sky takes
+     the stars with it. What is left only just picks out the horizon. */
+  --light-core: rgba(214, 206, 255, 0.09);
+  --light-mid: rgba(168, 148, 232, 0.028);
+  --light-far: rgba(146, 126, 212, 0.012);
   --light-origin-x: 86%;
   --light-origin-y: -8%;
   --light-reach: 52%;
-  --shaft-opacity: 0.05;
+  --shaft-opacity: 0.02;
   --shaft-angle: -20deg;
   --shaft-blur: 26px;
-  --shaft-colour: rgba(200, 220, 255, 0.3);
+  --shaft-colour: rgba(214, 200, 255, 0.3);
 }
 
 /* -- depth bands -------------------------------------------------------- */
