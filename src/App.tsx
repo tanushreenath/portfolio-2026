@@ -2,8 +2,10 @@ import { useState } from "react";
 import contentData from "./content/content.json";
 import type { Content, Mood, Route } from "./types/content";
 import { useMood } from "./hooks/useMood";
-import { useRoute } from "./hooks/useRoute";
+import { isRoute, useRoute } from "./hooks/useRoute";
 import { Scene } from "./components/Scene";
+import type { HoverVia } from "./components/SceneObject";
+import { Cursor } from "./components/Cursor";
 import { Page } from "./components/Page";
 import { Contact } from "./components/Contact";
 import { Help } from "./components/Help";
@@ -56,6 +58,9 @@ const PAGES: Record<
 export default function App() {
   const [mood, setMood] = useMood(content.scene.defaultMood, content.scene.moods);
   const [hovered, setHovered] = useState<string | null>(null);
+  /** Whether the object being reached for is under a pointer, which is the
+   *  only case with somewhere to put a butterfly. */
+  const [onPointer, setOnPointer] = useState(false);
   const [touched, setTouched] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -63,15 +68,18 @@ export default function App() {
 
   const objects = content.objects;
 
+  // Only pages arrive here. An object that leads to a file is an anchor and the
+  // browser follows it without asking the app -- see SceneObject.
   const activate = (id: string) => {
     setTouched(true);
     const target = objects.find((o) => o.id === id)?.href;
-    if (target) go(target);
+    if (target && isRoute(target)) go(target);
   };
 
-  const hover = (id: string | null) => {
+  const hover = (id: string | null, via: HoverVia) => {
     if (id) setTouched(true);
     setHovered(id);
+    setOnPointer(Boolean(id) && via === "pointer");
   };
 
   if (route !== "/") {
@@ -98,6 +106,7 @@ export default function App() {
 
       <Stars />
       <Light mood={mood as Mood} />
+      <Cursor active={onPointer} mood={mood as Mood} />
 
       <Welcome
         profile={content.profile}

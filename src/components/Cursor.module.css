@@ -1,0 +1,152 @@
+/* The cursor: a butterfly by day, a firefly at night.
+
+   Not a `cursor: url()`, which is the obvious way to do this and cannot work:
+   a CSS cursor is one static image, and both of these move. So it is an element
+   pinned to the pointer, with the system arrow hidden underneath it. */
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-cursor);
+  /* It sits directly under the pointer. Anything less than this and it would
+     take every hover away from the thing being hovered, which reads as a
+     flicker and, on a click, as nothing happening at all. */
+  pointer-events: none;
+  /* Centring uses `translate`, not `transform`: the transform is rewritten on
+     every pointer move, and a centring offset baked into it would have to be
+     re-applied on each of those writes. */
+  translate: -50% -50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  /* Its own layer, promoted before the first move rather than on it. Anything
+     that makes the browser re-decide this mid-flight costs the frame it is
+     decided on, and on a cursor a dropped frame is visible as a stutter. */
+  will-change: transform;
+}
+
+/* Reaching for an object: the arrow has just been hidden under it, and this is
+   what replaces it. Everywhere else this is not there at all and the pointer is
+   the pointer. */
+.on {
+  opacity: 1;
+}
+
+/* The tilt, on its own element so it cannot fight the transform carrying the
+   pointer position.
+
+   Rotation only, about the body. A drift would look lovely and would also mean
+   the cursor was no longer where the pointer is -- a few pixels off, in a
+   direction that keeps changing, on the one element whose whole job is to say
+   precisely where you are pointing. */
+.flit {
+  display: block;
+  transform-origin: 50% 50%;
+  animation: flit 1.4s ease-in-out infinite;
+}
+
+@keyframes flit {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+
+.wings {
+  display: block;
+  width: 34px;
+  height: 29px;
+  /* No filter here, and specifically no drop-shadow.
+   *
+   * A filter has to be re-rasterised whenever what is under it changes, and
+   * the wings change every frame -- so a drop-shadow would be a full re-render
+   * of the shape, per frame, on the one element that must never be a frame
+   * late. What it was doing is done instead by the rim stroked around each wing
+   * in the SVG, and at night by the firefly's own light. */
+}
+
+/* Each pair hinges on the body, which is where a wing actually hinges. A wing
+   seen from above does not rotate as it beats -- it turns edge-on and
+   foreshortens, which in two dimensions is a scale on X and nothing else.
+
+   Deliberately off the scene's clock. Every other motion in the garden shares
+   one 5.5s period so the place breathes together; a wingbeat is not weather,
+   it belongs to the one creature doing it, and on the clock it would beat in
+   time with the grass. */
+.wingLeft,
+.wingRight {
+  transform-box: fill-box;
+  animation: beat var(--beat, 0.62s) ease-in-out infinite;
+}
+
+.wingLeft {
+  transform-origin: right center;
+}
+
+.wingRight {
+  transform-origin: left center;
+}
+
+/* Never closes past 0.58: the beat is fast, and taken to nearly nothing the
+   pair reads for half of every cycle as one wing with a bite out of it. */
+@keyframes beat {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.58);
+  }
+}
+
+/* -- firefly ------------------------------------------------------------- */
+
+/* A firefly's wings are a blur, not a flutter: four beats to the butterfly's
+   one, and barely closing, because at this speed what you see is the envelope
+   they sweep rather than the wings themselves. */
+.firefly {
+  --beat: 0.16s;
+}
+
+/* The lantern.
+ *
+ * Held dark most of the cycle and lit in a short flare, rather than pulsed
+ * smoothly. A sine wave reads as a notification badge; a firefly is dark, then
+ * suddenly not, then dark again, and the waiting is most of what makes it one.
+ *
+ * Opacity only. A glow wants a blur, and a blur here is a filter -- the one
+ * thing this element cannot afford (see .wings). The softness comes from a
+ * radial gradient painted into the SVG instead, which costs nothing to
+ * re-composite because its geometry never changes. */
+.ember {
+  animation: ember 2.6s ease-in-out infinite;
+}
+
+@keyframes ember {
+  0%,
+  58% {
+    opacity: 0.1;
+  }
+  70% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.42;
+  }
+  88% {
+    opacity: 0.86;
+  }
+  100% {
+    opacity: 0.1;
+  }
+}
+
+/* No pointer, no cursor to replace. */
+@media (hover: none), (pointer: coarse) {
+  .cursor {
+    display: none;
+  }
+}

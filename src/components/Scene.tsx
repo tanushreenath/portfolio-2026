@@ -2,14 +2,14 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { SceneObjectData } from "../types/content";
 import { bounds } from "../assets/bounds";
 import { backgroundImage } from "../assets/registry";
-import { SceneObject } from "./SceneObject";
+import { SceneObject, type HoverVia } from "./SceneObject";
 import styles from "./Scene.module.css";
 
 interface Props {
   objects: SceneObjectData[];
   hovered: string | null;
   overlayOpen: boolean;
-  onHover: (id: string | null) => void;
+  onHover: (id: string | null, via: HoverVia) => void;
   onActivate: (id: string) => void;
 }
 
@@ -111,6 +111,15 @@ export function Scene({
       [...objects]
         .sort(
           (a, b) =>
+            // Destinations tab in the order the eye travels, and nothing else
+            // may reorder them. An explicit z used to be a scenery-only thing,
+            // so sorting on it first was safe; the lamp post is a destination
+            // that carries one -- it stands behind the path stones -- and
+            // sorting on z first would have made the resume the first thing
+            // Tab reaches, ahead of the work it is a summary of. Paint order
+            // is unaffected: `zIndex` in the placement is what honours z, and
+            // an explicit z-index beats DOM order.
+            Number(Boolean(a.href)) - Number(Boolean(b.href)) ||
             // Scenery carries an explicit z; it paints first and never tabs.
             (a.z ?? 999) - (b.z ?? 999) ||
             BAND_ORDER[a.band] - BAND_ORDER[b.band] ||

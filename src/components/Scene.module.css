@@ -388,13 +388,6 @@
   pointer-events: none;
   max-width: 240px;
   opacity: 0;
-  /* Three stops rather than two. Against flat paper one soft glow was enough;
-     against grass and cloud the type needs a tight core to hold its edges as
-     well as a wide fade to lift it off the field. */
-  text-shadow:
-    0 0 3px var(--halo),
-    0 0 8px var(--halo),
-    0 0 18px color-mix(in srgb, var(--halo) 70%, transparent);
 }
 
 /* .anim-fade-in (motion.css) carries the reveal. */
@@ -402,15 +395,13 @@
 .labelTitle {
   font-size: var(--type-md);
   color: var(--ink);
-  opacity: 0.95;
   margin: 0;
   line-height: 1.4;
 }
 
 .labelMeta {
   font-size: var(--type-sm);
-  color: var(--ink);
-  opacity: 0.68;
+  color: var(--ink-soft);
   margin: 2px 0 0;
   line-height: 1.4;
 }

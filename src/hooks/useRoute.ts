@@ -1,7 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Route } from "../types/content";
+import type { Destination, Route } from "../types/content";
 
 const ROUTES: Route[] = ["/", "/work", "/about", "/playground"];
+
+/**
+ * Whether a destination is a page this app renders.
+ *
+ * Not every destination is: the lamp post leads to a PDF sitting in `public/`,
+ * which the browser fetches for itself. Anything this returns false for must
+ * not be pushed onto the history stack -- doing so would swap the garden for a
+ * route that does not exist and land on the "/" fallback.
+ */
+export function isRoute(href: Destination): href is Route {
+  return (ROUTES as string[]).includes(href);
+}
 
 function read(): Route {
   const p = window.location.pathname.replace(/\/+$/, "") || "/";

@@ -56,6 +56,9 @@
   --z-label: 620;
   --z-chrome: 650;
   --z-dialog: 800;
+  /* Above everything, including a dialog: it is standing in for the pointer,
+     and a pointer is never behind anything. */
+  --z-cursor: 900;
 
   /* -- rhythm ----------------------------------------------------------- */
   --edge: 30px;
@@ -84,8 +87,20 @@
      Brighter and warmer than the reference, which sits quite muted. The
      scene should feel like a good morning. */
   --paper: #fbf1de;
-  --ink: #4a3a2a;
-  --ink-soft: rgba(74, 58, 42, 0.72);
+  /* Dark enough to be read over the meadow, not only over paper.
+   *
+   * Every piece of type in the garden stands on grass, and grass is a mid
+   * value: it is close enough to a mid-brown that the two nearly cancel. This
+   * is roughly L* 20 against a field around L* 80, which clears 8:1 on its
+   * own -- which it now has to, since nothing is laid behind the letters to
+   * help. The old #4a3a2a did not have that headroom, and what it did have was
+   * being spent twice over by the opacities layered on top of it. */
+  --ink: #33261a;
+  /* Secondary type. Note this is where the hierarchy is now made: a second,
+     lighter ink rather than a second opacity stacked on the first. Two nested
+     opacities multiply, which is how corner text ended up at 0.66 of an ink
+     that was already too light. */
+  --ink-soft: rgba(51, 38, 26, 0.82);
   /* ONE CANONICAL FILTER SHAPE, used by every mood-graded layer:
        saturate() brightness() contrast()
 
@@ -106,15 +121,6 @@
      brown, and the transition sweeps the whole wheel on its way there. The
      blue of night comes from --ground-tint, one flat colour over the field. */
   --scene-filter: saturate(1.16) brightness(1.06) contrast(1.02);
-
-  /* The halo behind corner type and hover reveals.
-     Kept separate from --paper because they used to be the same thing: the
-     garden sat on flat paper, so a glow the colour of the paper was invisible
-     until it crossed a painting. With a meadow behind the type, --paper is no
-     longer what is actually behind it, and a cream glow over grass reads as a
-     smudge. This is the colour the type needs to be lifted off, which at dawn
-     is the pale sky and at dusk is the dark of the field. */
-  --halo: rgba(255, 252, 240, 0.92);
 
   /* -- ground -------------------------------------------------------------
      The meadow, graded per mood. It is one painting of a sunlit field, so
@@ -271,9 +277,8 @@
      wheel from the grass and stays a colour of its own on top of it, which is
      what lets the night read as a colour rather than as an absence. */
   --paper: #1b1430;
-  --ink: rgba(244, 240, 255, 0.96);
-  --ink-soft: rgba(244, 240, 255, 0.66);
-  --halo: rgba(14, 8, 26, 0.86);
+  --ink: rgb(248, 245, 255);
+  --ink-soft: rgba(248, 245, 255, 0.8);
 
   /* Night over the same field: the light goes, the colour stays. Saturation
      holds at 1, so the grass is still the green it was painted -- pulling it
@@ -412,6 +417,7 @@ body {
   -webkit-font-smoothing: antialiased;
   transition: background 2.4s ease, color 2.4s ease;
 }
+
 
 #root {
   height: 100dvh;

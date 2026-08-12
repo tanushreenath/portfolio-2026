@@ -19,6 +19,10 @@
   background: none;
   font: inherit;
   color: inherit;
+  /* An object is a painting, whichever element it is. The two interactive
+     kinds -- a button for a page, an anchor for a file -- arrive with
+     different defaults, so both are flattened here. */
+  text-decoration: none;
   z-index: var(--band-z);
   /* Centring uses the independent `translate` property, not `transform`.
      The enter animation animates `transform` with fill-mode both, which would
@@ -29,6 +33,19 @@
 .interactive {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Over an object, and only over an object, the butterfly is the cursor -- so
+   the arrow gets out of its way (see components/Butterfly).
+ *
+ * Guarded on a real pointer existing, and scoped to the paintings rather than
+ * set site-wide: everywhere else the arrow is doing a job nothing is standing
+ * in for, and losing it over 11px of corner type would cost more than the
+ * butterfly is worth. Here the target is a toadstool. */
+@media (hover: hover) and (pointer: fine) {
+  .interactive {
+    cursor: none;
+  }
 }
 
 /* One composition at every size means an object is only ever as large as the

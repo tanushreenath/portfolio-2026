@@ -10,6 +10,17 @@ export type Band = "foreground" | "midground" | "distance";
 export type Mood = "dawn" | "dusk";
 export type MotionPreset = "sway-large" | "sway-medium" | "sway-small" | "hang-swing" | "still";
 export type Route = "/" | "/work" | "/about" | "/playground";
+/**
+ * A file served straight from `public/`, rather than a page the app renders.
+ *
+ * Kept distinct from Route because the two are followed differently: a route is
+ * pushed onto the history stack and the garden is replaced, a file leaves the
+ * site altogether and opens in its own tab. The extension in the type is what
+ * lets both the router and the object markup tell them apart.
+ */
+export type FileHref = `/${string}.pdf`;
+/** Where an object leads. */
+export type Destination = Route | FileHref;
 /** Which side of the cursor a two-state painting belongs to. */
 export type PartState = "rest" | "hover";
 /** Which side of an object its hover reveal sits on. */
@@ -139,7 +150,7 @@ export interface ObjectSign {
 export interface SceneObjectData {
   id: string;
   /** Where this object leads. Omitted for scenery. */
-  href?: Route;
+  href?: Destination;
   parts: ObjectPart[];
   /** Width-to-height ratio of the object's box. Required for multi-part
    *  objects, which position their parts inside it. */

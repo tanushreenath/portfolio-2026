@@ -59,6 +59,7 @@
     },
     {
       "id": "lamp",
+      "href": "/tanushree-nath-resume.pdf",
       "aspect": 0.238,
       "parts": [
         {
@@ -91,9 +92,10 @@
       "z": 5,
       "lit": true,
       "label": {
-        "title": "",
-        "meta": ""
-      }
+        "title": "Resume",
+        "meta": "PDF · Opens in a new tab"
+      },
+      "labelSide": "right"
     },
     {
       "id": "signpost",

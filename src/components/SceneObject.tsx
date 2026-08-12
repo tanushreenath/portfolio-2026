@@ -8,11 +8,30 @@ import styles from "./SceneObject.module.css";
  *  is never caught starting. */
 const LETTER_STAGGER = -0.18;
 
+/**
+ * Whether a destination names a file rather than a page.
+ *
+ * This is a question about the string, not about the site's routes -- which is
+ * the point. It lets an object know that reaching it should follow a link out
+ * without this file having to learn what the routes are.
+ */
+const isFile = (href: string) => /\.[a-z0-9]+$/i.test(href);
+
+/**
+ * How an object was reached.
+ *
+ * The reveal is the same either way, but the butterfly cursor is not: it has
+ * to sit on a pointer, and a visitor arriving by Tab has not got one. Reported
+ * rather than inferred, because by the time it reaches the top of the app the
+ * two are indistinguishable.
+ */
+export type HoverVia = "pointer" | "focus";
+
 interface Props {
   data: SceneObjectData;
   enterDelay: number;
   onActivate: (id: string) => void;
-  onHover: (id: string | null) => void;
+  onHover: (id: string | null, via: HoverVia) => void;
   registerRef: (id: string, el: HTMLElement | null) => void;
 }
 
@@ -166,7 +185,7 @@ export function SceneObject({
     <Painting key={p.asset} part={p} clustered={clustered} />
   ));
 
-  // Scenery. Not a destination, so not a button, not focusable, not hoverable.
+  // Scenery. Not a destination, so not a link, not focusable, not hoverable.
   //
   // Hidden from assistive tech unless it says something. A signpost is still
   // scenery -- it leads nowhere and cannot be clicked -- but "Welcome to Tanu's
@@ -188,23 +207,51 @@ export function SceneObject({
     );
   }
 
-  return (
-    <button
-      type="button"
-      ref={(el) => registerRef(data.id, el)}
-      className={`${styles.object} ${styles.interactive} anim-enter band-${data.band}`}
-      style={placement}
-      aria-labelledby={labelId}
-      onClick={() => onActivate(data.id)}
-      onMouseEnter={() => onHover(data.id)}
-      onMouseLeave={() => onHover(null)}
-      onFocus={() => onHover(data.id)}
-      onBlur={() => onHover(null)}
-    >
+  // Shared by both kinds of destination. Reaching an object is reaching it
+  // whether it is a page or a file: the same reveal, the same lift, the same
+  // breath, and only what happens on the click differs.
+  const reached = {
+    ref: (el: HTMLElement | null) => registerRef(data.id, el),
+    className: `${styles.object} ${styles.interactive} ${
+      data.lit ? styles.lit : ""
+    } anim-enter band-${data.band}`,
+    style: placement,
+    "aria-labelledby": labelId,
+    onMouseEnter: () => onHover(data.id, "pointer"),
+    onMouseLeave: () => onHover(null, "pointer"),
+    onFocus: () => onHover(data.id, "focus"),
+    onBlur: () => onHover(null, "focus"),
+  };
+
+  const inside = (
+    <>
       <span id={labelId} hidden>
         {data.label.title}, {data.label.meta}
       </span>
       <span className={`${styles.breath} anim-breathe`}>{paintings}</span>
+    </>
+  );
+
+  // A file is a real link, not a button that opens one.
+  //
+  // The lamp post leads to a PDF the browser fetches for itself, and an anchor
+  // is the only way that behaves the way a link is expected to: cmd-click and
+  // middle-click open it in a background tab, the status bar shows where it
+  // goes, and "Save link as" is there. window.open() from a button offers none
+  // of that -- it also has to survive a popup blocker, which a plain link does
+  // not. The site's own pages stay buttons: they are pushState navigations
+  // inside one document, not somewhere else to go.
+  if (isFile(data.href)) {
+    return (
+      <a {...reached} href={data.href} target="_blank" rel="noopener noreferrer">
+        {inside}
+      </a>
+    );
+  }
+
+  return (
+    <button {...reached} type="button" onClick={() => onActivate(data.id)}>
+      {inside}
     </button>
   );
 }

@@ -31,7 +31,7 @@
   /* The only way out of a page, so it holds full ink rather than the muted
      tone used for passive corner text. */
   color: var(--ink);
-  opacity: 0.75;
+  opacity: 0.9;
   cursor: pointer;
   transition: opacity 0.3s ease;
 }

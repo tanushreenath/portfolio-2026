@@ -1,19 +1,20 @@
 /* Everything fixed to the four corners. Text lives only here and in hover
    reveals -- that restraint is where the negative space comes from. */
 
+/* Full ink, not 78% of it.
+ *
+ * This text is quiet by being small, sparse and cornered -- it does not also
+ * need to be faint, and it was: the corners sat at 0.78 of an ink already too
+ * light for grass, and the pieces inside them (the contact link, the help
+ * ring, the sub-line) each multiplied that again down to as little as 0.58.
+ * Restraint that costs legibility is not restraint. Anything genuinely
+ * secondary now says so with --ink-soft instead. */
 .corner {
   position: fixed;
   z-index: var(--z-chrome);
   font-size: var(--type-sm);
   color: var(--ink);
-  opacity: 0.78;
   line-height: 1.5;
-  /* See the note on .label in Scene.module.css -- a meadow behind 11px type
-     needs a tighter halo than flat paper did. */
-  text-shadow:
-    0 0 3px var(--halo),
-    0 0 8px var(--halo),
-    0 0 18px color-mix(in srgb, var(--halo) 70%, transparent);
   transition: opacity 0.5s ease, color 2.4s ease;
 }
 
@@ -36,7 +37,7 @@
 
 .sub {
   margin: 6px 0 0;
-  opacity: 0.82;
+  color: var(--ink-soft);
 }
 
 /* Recedes while a visitor is considering an object, so the two never compete
@@ -64,7 +65,7 @@
   font-size: 21px;
   line-height: 1;
   color: var(--ink);
-  opacity: 0.62;
+  opacity: 0.82;
   cursor: pointer;
   transition: opacity 0.3s ease, color 2.4s ease;
 }
@@ -84,13 +85,8 @@
   top: calc(var(--edge) + 58px);
   z-index: var(--z-chrome);
   font-size: var(--type-sm);
-  color: var(--ink);
-  opacity: 0.62;
+  color: var(--ink-soft);
   pointer-events: none;
-  /* Not a .corner, so it carries its own halo. */
-  text-shadow:
-    0 0 3px var(--halo),
-    0 0 8px var(--halo);
 }
 
 /* -- contact link ------------------------------------------------------ */
@@ -103,7 +99,7 @@
   font-size: var(--type-sm);
   letter-spacing: var(--tracking);
   color: inherit;
-  opacity: 0.85;
+  opacity: 0.9;
   cursor: pointer;
   transition: opacity 0.3s ease;
 }
@@ -125,14 +121,14 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 62%, transparent);
   border-radius: 50%;
   background: none;
   font: inherit;
   font-size: 10px;
   line-height: 1;
   color: inherit;
-  opacity: 0.75;
+  opacity: 0.9;
   cursor: pointer;
   transition: opacity 0.3s ease, border-color 0.3s ease;
 }
