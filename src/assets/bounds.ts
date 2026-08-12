@@ -17,25 +17,11 @@ export interface AssetBounds {
 }
 
 export const bounds: Record<string, AssetBounds> = {
-  "frog-closed-light": {
-    "top": 0.0554,
-    "right": 0.9805,
-    "bottom": 0.9788,
-    "left": 0.0482,
-    "aspect": 1.0867
-  },
   "frog-closed": {
     "top": 0.0605,
     "right": 0.9787,
     "bottom": 0.9657,
     "left": 0,
-    "aspect": 1.0867
-  },
-  "frog-open-light": {
-    "top": 0.0212,
-    "right": 0.9796,
-    "bottom": 0.9617,
-    "left": 0.0195,
     "aspect": 1.0867
   },
   "frog-open": {
@@ -69,8 +55,8 @@ export const bounds: Record<string, AssetBounds> = {
   "signpost": {
     "top": 0.0188,
     "right": 0.9803,
-    "bottom": 0.9812,
-    "left": 0.0197,
+    "bottom": 0.8892,
+    "left": 0.0656,
     "aspect": 0.9551
   },
   "toadstool-amber": {

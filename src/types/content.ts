@@ -176,10 +176,93 @@ export interface SceneObjectData {
   label: ObjectLabel;
   /** Chosen per object so a reveal never lands on artwork. Default "above". */
   labelSide?: LabelSide;
+  /**
+   * Raise this object's reveal, as a fraction of the artwork's own height.
+   *
+   * A side label defaults to the middle of the painting it belongs to, which is
+   * the right answer for a compact object and the wrong one for two of these.
+   * A lamp post is mostly post: its middle is a pole, and the label lands in
+   * the flowered grass beside it rather than beside the lantern anyone is
+   * actually looking at. The wishing well's middle puts its two lines across
+   * the horizon, one on sky and one on grass, which is the worst place on the
+   * whole canvas to read two lines of type.
+   *
+   * A fraction rather than pixels, for the reason every other measurement here
+   * is a percentage: there is one composition at every screen size, and a lift
+   * in px would be a different lift on every screen.
+   */
+  labelLift?: number;
 }
 
-/** A piece of work. Lives in content ready for the /work page's design. */
+/**
+ * One plate in a case study's strip.
+ *
+ * `asset` is optional on purpose, and the reason is the same one the scene's
+ * registry gives: content declares the whole case study, including the frames
+ * whose screenshot does not exist yet, and a figure without one renders as a
+ * labelled plate rather than as a gap. Adding the real image later is a file
+ * drop plus one line in the registry -- never a change to this page.
+ *
+ * `aspect` is the plate's shape, not the image's size. The strip runs at one
+ * height and every plate is drawn `height * aspect` wide, so a phone screen and
+ * a dashboard can sit side by side on one line without either being cropped.
+ */
+export interface WorkFigure {
+  /** Key into the asset registry. Absent until the artwork exists. */
+  asset?: string;
+  /** Width-to-height ratio of the plate. ~1.78 for a screen, ~0.46 for a phone. */
+  aspect: number;
+  /** What the plate shows. Its alt text once there is an image; its only
+   *  content until then. */
+  caption: string;
+}
+
+/**
+ * An outcome, split rather than written as one sentence.
+ *
+ * The number is the thing being claimed and it is set in the page's own ink
+ * while the clause around it stays quiet -- which a single string could not
+ * express without the component parsing English to find the digits.
+ */
+export interface WorkMetric {
+  value: string;
+  label: string;
+}
+
+/** A case study. The /work page is this array and nothing else. */
 export interface WorkItem {
+  id: string;
+  /** How the project is named in the index. */
+  title: string;
+  /** How it is named inside the opened case study, when the index says more.
+   *  Falls back to `title`. */
+  caseTitle?: string;
+  /** The one line that says what the project did. Index and case study share it. */
+  subtitle: string;
+  /** Right-hand column of the index. A year, not a range -- the range is
+   *  `period`, and it belongs inside the case study where there is room. */
+  year: string;
+  company: string;
+  period: string;
+  role: string;
+  /** The claim the case study opens with. One sentence, no full stop. */
+  headline: string;
+  /** One paragraph per entry. */
+  body: string[];
+  metrics: WorkMetric[];
+  figures: WorkFigure[];
+  /** The full write-up, elsewhere. Opens in its own tab. */
+  href?: string;
+}
+
+/**
+ * Work that is real but is not a case study.
+ *
+ * Held here rather than deleted: every one of these is already described from
+ * the employer's side in `experience`, and the /work index is deliberately four
+ * rows deep. This is where a fifth would come from.
+ */
+export interface OtherWorkItem {
   id: string;
   title: string;
   company: string;
@@ -187,7 +270,6 @@ export interface WorkItem {
   role: string;
   summary: string;
   metrics: string[];
-  href?: string;
 }
 
 export interface ExperienceEntry {
@@ -213,6 +295,9 @@ export interface ProfileLink {
 
 export interface Profile {
   name: string;
+  /** The name she goes by everywhere that is not a signature. It is what sits
+   *  in the top right of every page away from the garden. */
+  handle: string;
   title: string;
   location: string;
   welcome: { greeting: string; sub: string };
@@ -232,6 +317,7 @@ export interface Content {
   scene: SceneConfig;
   objects: SceneObjectData[];
   work: WorkItem[];
+  otherWork: OtherWorkItem[];
   experience: ExperienceEntry[];
   education: EducationEntry[];
   skills: Record<string, string[]>;

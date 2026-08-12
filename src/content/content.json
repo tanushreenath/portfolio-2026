@@ -1,6 +1,7 @@
 {
   "profile": {
     "name": "Tanushree Nath",
+    "handle": "maybethismatters",
     "title": "Product Designer",
     "location": "Bengaluru, Karnataka, India",
     "welcome": {
@@ -95,7 +96,8 @@
         "title": "Resume",
         "meta": "PDF · Opens in a new tab"
       },
-      "labelSide": "right"
+      "labelSide": "right",
+      "labelLift": 0.3
     },
     {
       "id": "signpost",
@@ -152,7 +154,8 @@
         "title": "Playground",
         "meta": "Experiments · Side work"
       },
-      "labelSide": "left"
+      "labelSide": "left",
+      "labelLift": 0.22
     },
     {
       "id": "about",
@@ -243,59 +246,118 @@
   ],
   "work": [
     {
-      "id": "banking-dashboards",
-      "title": "Enterprise Banking Dashboards",
+      "id": "bit-nudge",
+      "title": "Bit Nudge",
+      "subtitle": "Simplifying Financial Decision For RMs",
+      "year": "2026",
       "company": "GameChange",
       "period": "Jan 2025 – Present",
       "role": "Product Designer",
-      "summary": "Portfolio tracking, KPI monitoring, transaction oversight and support workflows across three enterprise banking products — Bitnudge, Engage and the Ticket Portal.",
+      "headline": "Helping RMs make faster, smarter decisions by turning scattered financial data into a single, actionable system",
+      "body": [
+        "Bit Nudge is a fintech SaaS platform built for banks to help Relationship Managers (RMs) and senior leadership understand portfolios, prioritise opportunities, and manage daily tasks — all in one place.",
+        "Before Bit Nudge, critical information lived across multiple tools, emails, spreadsheets, and conversations. RMs spent more time finding data than using it.",
+        "This project aimed to transform that experience."
+      ],
       "metrics": [
-        "18% increase in high-value opportunities pursued",
-        "42% faster access to critical financial insights",
-        "90% cross-platform design consistency"
+        { "value": "18%", "label": "increase in high-value opportunities pursued" },
+        { "value": "42%", "label": "faster access to critical financial data" },
+        { "value": "90%", "label": "cross-platform design consistency" }
+      ],
+      "figures": [
+        { "aspect": 1.78, "caption": "Portfolio overview: exposure, concentration and movement in one frame" },
+        { "aspect": 0.46, "caption": "The day's nudges, ranked, on a phone between meetings" },
+        { "aspect": 1.78, "caption": "Opportunity queue, sorted by value rather than by date" },
+        { "aspect": 1.78, "caption": "Client 360 — holdings, conversations and open tasks together" },
+        { "aspect": 0.46, "caption": "A single nudge, and the action it asks for" }
       ],
       "href": "https://www.figma.com/deck/IorkEqc5wERaTduFtrWFkd"
     },
     {
-      "id": "influencerbit",
-      "title": "InfluencerBit — Brand & 0→1 MVP",
-      "company": "Restless Monks",
-      "period": "Jun 2021 – Feb 2022",
-      "role": "Junior UX Designer",
-      "summary": "Design and branding for InfluencerBit (now Engagebud), establishing product identity and a cohesive visual language. Research, interaction design and rapid prototyping delivered an MVP inside a three-week sprint.",
-      "metrics": [
-        "14x ROI for clients",
-        "400 orders per campaign on average",
-        "Over 1M impressions per campaign"
-      ],
-      "href": "https://www.notion.so/Empowering-Brands-with-Customer-Advocacy-InfluencerBit-Case-Study-8950452ccff64b04865d3cd17e31fc39"
-    },
-    {
       "id": "bild-bom",
-      "title": "Bill of Materials Workflow",
+      "title": "Bill of Material Workflow",
+      "caseTitle": "Bill of Material",
+      "subtitle": "Redefining Dashboards for the Hardware Industry",
+      "year": "2024",
       "company": "Bild",
       "period": "Nov 2023 – Mar 2024",
       "role": "Product Designer",
-      "summary": "A ground-up revision of the Bill of Materials workflow for the hardware industry, rebuilt around how engineering teams actually assemble and revise a BOM.",
+      "headline": "Rebuilding the Bill of Materials around the way engineering teams actually assemble and revise one",
+      "body": [
+        "Bild is a hardware development platform, and the Bill of Materials sits at the centre of the work it supports: every part a product is made of, where it comes from, and what changed since the last revision.",
+        "It was also the slowest thing in the tool. Parts were entered one at a time, revisions stayed invisible until something broke further down the line, and the dashboard reported on a BOM without ever showing the state of one. Teams kept a spreadsheet open beside the product to do the thinking, then typed the result back in.",
+        "The workflow was rebuilt from the assembly outward — bulk entry, revision history in place, and a dashboard that reads the BOM rather than summarising it."
+      ],
       "metrics": [
-        "4x faster BOM creation",
-        "300% increase in BOM visibility",
-        "70% reduction in data entry errors"
+        { "value": "4x", "label": "faster BOM creation" },
+        { "value": "300%", "label": "increase in BOM visibility" },
+        { "value": "70%", "label": "reduction in data entry errors" }
+      ],
+      "figures": [
+        { "aspect": 1.78, "caption": "The rebuilt BOM dashboard, reading the assembly rather than summarising it" },
+        { "aspect": 0.46, "caption": "Part detail, sourcing and lead time" },
+        { "aspect": 1.78, "caption": "Bulk entry — a whole sub-assembly in one pass" },
+        { "aspect": 1.78, "caption": "Revision history, in place beside the parts it changed" },
+        { "aspect": 1.78, "caption": "Before and after, on the same assembly" }
       ],
       "href": "https://www.figma.com/slides/syHseblvDh4j1Z2QkCBinO/Redefining-Dashboards-for-the-Hardware-Industry-at-Bild?node-id=1-26"
     },
     {
       "id": "bild-design-system",
-      "title": "Design System",
+      "title": "BILD Design System",
+      "subtitle": "Building Bild's Design System from Scratch",
+      "year": "2024",
       "company": "Bild",
       "period": "Nov 2023 – Mar 2024",
       "role": "Product Designer",
-      "summary": "A scalable design system for Bild — standardising patterns, accelerating feature delivery and holding visual consistency across the whole product ecosystem.",
+      "headline": "One system behind every surface, so a new feature arrives already knowing what it looks like",
+      "body": [
+        "Bild's product had grown a screen at a time, and it showed: four greys doing the job of one, buttons that agreed on colour but not on height, and a spacing scale that existed only in the last file anyone opened.",
+        "The system was built from what was already shipping rather than from a blank canvas — an audit first, then tokens, then the components the audit proved were being rebuilt over and over.",
+        "What it bought was speed. Patterns stopped being decisions, and consistency stopped being something to police release by release."
+      ],
       "metrics": [
-        "18% increase in client acquisition through refined usability"
+        { "value": "18%", "label": "increase in client acquisition through refined usability" }
+      ],
+      "figures": [
+        { "aspect": 1.78, "caption": "Foundations — colour, type and spacing as tokens" },
+        { "aspect": 1.78, "caption": "The component library, grouped by the job each does" },
+        { "aspect": 0.46, "caption": "Components at mobile widths" },
+        { "aspect": 1.78, "caption": "Documentation: the rule, and the reason for it" },
+        { "aspect": 1.78, "caption": "The same screen before and after adoption" }
       ],
       "href": "https://www.figma.com/slides/CgYwduP7U9Gup06E8zAqyf/Creating-Design-System-for-Bild?node-id=1-62"
     },
+    {
+      "id": "influencerbit",
+      "title": "InfluencerBit",
+      "subtitle": "Empowering Brands with Customer Advocacy",
+      "year": "2022",
+      "company": "Restless Monks",
+      "period": "Jun 2021 – Feb 2022",
+      "role": "Junior UX Designer",
+      "headline": "Turning the customers a brand already has into the channel it markets through",
+      "body": [
+        "InfluencerBit — now Engagebud — finds the people already buying from a brand and already talking about it, and gives the brand a way to work with them.",
+        "It was a 0→1 product, so the identity and the interface were designed at once: research, interaction design and a visual language built while the product was still being defined.",
+        "The MVP was researched, designed and prototyped inside a three-week sprint."
+      ],
+      "metrics": [
+        { "value": "14x", "label": "ROI for clients" },
+        { "value": "400", "label": "orders per campaign on average" },
+        { "value": "1M+", "label": "impressions per campaign" }
+      ],
+      "figures": [
+        { "aspect": 1.78, "caption": "Campaign dashboard — advocates, reach and orders" },
+        { "aspect": 0.46, "caption": "The advocate's side, on a phone" },
+        { "aspect": 1.78, "caption": "Finding advocates inside a brand's own customer list" },
+        { "aspect": 1.78, "caption": "Brand identity: mark, palette and type" },
+        { "aspect": 0.46, "caption": "Reward flow, end to end" }
+      ],
+      "href": "https://www.notion.so/Empowering-Brands-with-Customer-Advocacy-InfluencerBit-Case-Study-8950452ccff64b04865d3cd17e31fc39"
+    }
+  ],
+  "otherWork": [
     {
       "id": "kyc-kyb",
       "title": "KYC / KYB Onboarding",

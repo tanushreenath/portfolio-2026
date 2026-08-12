@@ -158,7 +158,10 @@ export function Scene({
 
       const r = artworkRect(active, el.getBoundingClientRect());
       const gap = LABEL_GAP;
-      const middle = r.top + r.height / 2;
+      // Off the middle, for objects whose middle is the wrong place to read.
+      // See SceneObjectData.labelLift.
+      const lift = (active.labelLift ?? 0) * r.height;
+      const middle = r.top + r.height / 2 - lift;
       const clampY = (y: number) => Math.min(Math.max(y, 96), window.innerHeight - 60);
       const side = active.labelSide ?? "above";
 
@@ -179,7 +182,7 @@ export function Scene({
       } else {
         setLabelBox({
           left: Math.min(Math.max(r.left + r.width / 2, 140), window.innerWidth - 140),
-          top: clampY(r.top - gap),
+          top: clampY(r.top - gap - lift),
           transform: "translate(-50%, -100%)",
           textAlign: "center",
         });

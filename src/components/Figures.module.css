@@ -1,0 +1,219 @@
+/* A case study's figures: one line of plates, pulled sideways.
+
+   The whole component is a scroll container and a row of flex children. There
+   is no track, no transform and no index -- which is why a trackpad, a
+   touchscreen, the arrow keys and a screen reader all move it correctly
+   without the component knowing they exist. */
+
+/* Registered so it can be interpolated. A custom property is a string to the
+   animation engine unless it has been given a type, so an un-registered
+   --fade-* would jump from 0px to 56px in one frame and the edge would blink
+   on instead of arriving. */
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.wrap {
+  /* How tall the strip runs. Every plate is drawn to this height and takes
+     whatever width its own proportions ask for, which is what lets a phone
+     screen and a dashboard sit on one line without either being cropped.
+
+     Fluid, because this is the one element on the page whose size is not a
+     matter of reading comfort: it is a picture, and a picture on a 1440 screen
+     should not be the size it is on a 380 one.
+
+     Against the viewport's HEIGHT rather than its width, since what actually
+     matters is that a plate and the line of type under it can be taken in
+     together -- a strip measured in vw fills a laptop screen top to bottom the
+     moment the window is wide. */
+  --plate-h: clamp(190px, 38vh, 400px);
+  /* Room above and below for a plate to lift into. The strip clips its own
+     overflow in both directions -- it has to, to scroll in one -- so a hover
+     that had nowhere to go would be cut off along the top edge. */
+  --plate-air: 14px;
+}
+
+.strip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: calc(var(--plate-h) + var(--plate-air) * 2);
+  padding: var(--plate-air) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  /* For the keyboard, and for nothing else: every programmatic scroll in
+     Figures.tsx passes behavior:"instant" precisely to opt out of this. */
+  scroll-behavior: smooth;
+  cursor: grab;
+
+  /* The scrollbar is replaced by the fig. line below and by the fades at each
+     end. A native bar under a row of plates is a second, uglier answer to the
+     same question. */
+  scrollbar-width: none;
+
+  /* More strip, that way. Both ends default to faded and the component turns
+     each off when there is nothing beyond it, so a strip narrow enough to fit
+     its column shows no fade at all. */
+  --fade-start: 56px;
+  --fade-end: 56px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent 100%
+  );
+  transition: --fade-start 0.45s ease, --fade-end 0.45s ease;
+}
+
+.strip::-webkit-scrollbar {
+  display: none;
+}
+
+.strip[data-at-start] { --fade-start: 0px; }
+.strip[data-at-end] { --fade-end: 0px; }
+
+/* Held while the mouse is down, so the hand does not flick back to `grab` the
+   instant the pointer stops over a gap between plates. */
+.strip[data-dragging] {
+  cursor: grabbing;
+  /* A drag across a caption would otherwise select it, and a strip that
+     highlights text as you pull it does not feel like paper. */
+  user-select: none;
+}
+
+/* A plate holds a screenshot. Sized by height and its own proportions -- never
+   by a width -- so the row keeps one baseline whatever is mounted on it. */
+.plate {
+  flex: 0 0 auto;
+  height: 100%;
+  aspect-ratio: var(--aspect, 1.78);
+  margin: 0;
+  border-radius: 26px;
+  overflow: hidden;
+  background: var(--plate);
+  box-shadow: 0 1px 0 var(--plate-edge), 0 10px 26px -18px rgba(20, 10, 0, 0.5);
+  transition: background 2.4s ease, box-shadow 0.5s var(--ease-out),
+    translate 0.5s var(--ease-out);
+}
+
+/* Not on the drag. A plate rising under the cursor while the whole row is
+   moving reads as the row wobbling, so the lift belongs to a still strip. */
+.strip:not([data-dragging]) .plate:hover {
+  translate: 0 -6px;
+  box-shadow: 0 1px 0 var(--plate-edge), 0 22px 34px -22px rgba(20, 10, 0, 0.55);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A plate with nothing mounted on it yet: it says what it is for. This is not
+   a spinner and not a grey box -- it is the caption, shown where the picture
+   will be, and it stops being visible the moment an asset is registered. */
+.pending {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  height: 100%;
+  padding: 24px;
+  font-size: var(--read-xs);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  /* A wash from the top corner, so an empty plate still has a light on it and
+     does not read as a flat rectangle of card. */
+  background: radial-gradient(
+    120% 90% at 12% 0%,
+    color-mix(in srgb, var(--ink) 5%, transparent) 0%,
+    transparent 62%
+  );
+}
+
+/* The one place a number is a number and not a word. Tabular, so five plates
+   in a row do not each set their own rhythm. */
+.figNo {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.55;
+}
+
+.what {
+  font-size: var(--read-sm);
+  text-wrap: pretty;
+}
+
+/* A plate taller than it is wide is a phone, and a phone is roughly 190px
+   across on this row. It cannot carry a sentence, so it keeps the number. */
+.plate[data-narrow] .what {
+  display: none;
+}
+
+.caption {
+  margin: 14px 0 0;
+  font-size: var(--read-xs);
+  color: var(--ink-soft);
+  transition: color 2.4s ease, opacity 0.4s ease;
+}
+
+/* Once you are holding it, it has stopped being an instruction. */
+.strip[data-dragging] + .caption {
+  opacity: 0.4;
+}
+
+/* One verb, chosen by what is doing the pointing. Both are in the markup and
+   only one is ever displayed, which also keeps them out of the accessible name
+   twice over -- `display: none` is not read. */
+.verbSwipe { display: none; }
+
+@media (hover: none) {
+  .verbDrag { display: none; }
+  .verbSwipe { display: inline; }
+}
+
+/* No pointer to grab with, and no drag to advertise. The strip still scrolls
+   -- natively, with momentum, which is the whole reason the drag is mouse-only
+   in the first place. */
+@media (hover: none) {
+  .strip { cursor: default; }
+}
+
+/* On a phone the height rule has to yield to the width one: a 38vh plate at
+   16:9 is 570px across on a 390px screen, so the first figure would arrive
+   already running off both edges and its caption would be unreadable. Sized
+   from the viewport's width here, which puts a landscape plate just inside
+   the column. */
+@media (max-width: 760px) {
+  .wrap {
+    --plate-h: min(34vh, 46vw);
+    --plate-air: 10px;
+  }
+
+  .strip {
+    gap: 12px;
+    --fade-start: 24px;
+    --fade-end: 24px;
+  }
+
+  .plate { border-radius: 18px; }
+
+  .pending { padding: 16px; }
+}

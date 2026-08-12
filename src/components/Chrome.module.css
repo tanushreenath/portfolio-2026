@@ -138,6 +138,110 @@
   border-color: currentColor;
 }
 
+/* -- page bar -------------------------------------------------------------
+   The header every page away from the garden wears: the way back, where you
+   are, and whose site this is.
+
+   Fixed, and reaching the full width rather than sitting in the page's column,
+   because it is furniture and not content -- the same three corners the garden
+   has, pulled onto one line.
+
+   It has no background of its own. A bar with a paper fill would draw a hard
+   edge across the page the moment anything scrolled under it, so the paper is
+   faded out instead: opaque behind the type, gone by the bottom of the mask.
+   Type passing underneath dissolves rather than being cut. */
+
+.pageBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-chrome);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 16px;
+  padding: var(--edge) var(--edge) 40px;
+  /* Long, and opaque well past the type. What passes underneath is not always
+     11px of body copy -- on /work it is a 400px white plate, and a short fade
+     would let one drift up behind the word "Work" still bright enough to read
+     the caption on. */
+  background: linear-gradient(
+    to bottom,
+    var(--paper) 0%,
+    var(--paper) 62%,
+    color-mix(in srgb, var(--paper) 72%, transparent) 82%,
+    transparent 100%
+  );
+  /* The fade is a wash of paper, and paper is not a surface you can click
+     through to. Only the three controls take the pointer. */
+  pointer-events: none;
+  transition: background 2.4s ease;
+}
+
+.pageBar > * {
+  pointer-events: auto;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--read-md);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+/* Back, home and the wordmark all sit on one optical line. The wordmark is the
+   only one that is not a control, so it alone is not a button. */
+.pageBack {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  background: none;
+  /* Set out rather than inherited: `font: inherit` is the usual way to strip a
+     button's UA type, and it would take the family back to the body's mono --
+     the bar sets its own, one rule above. */
+  font-family: var(--font-sans);
+  font-size: var(--read-md);
+  letter-spacing: 0;
+  color: var(--ink);
+  cursor: pointer;
+  transition: color 2.4s ease;
+}
+
+/* Only the arrow moves. Sliding the whole control would shift the word it is
+   attached to, and a label that moves on hover reads as a layout fault; an
+   arrow that leans toward where it goes reads as an answer. */
+.pageBackArrow {
+  display: inline-block;
+  transition: translate 0.4s var(--ease-out);
+}
+
+.pageBack:hover .pageBackArrow,
+.pageBack:focus-visible .pageBackArrow {
+  translate: -4px 0;
+}
+
+.pageWhere {
+  justify-self: center;
+  color: var(--ink);
+}
+
+.pageMark {
+  justify-self: end;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* Below this the three cells no longer fit on one line without the middle one
+   colliding with the wordmark. The wordmark is the one that can go: it says
+   nothing the visitor needs, and the title says where they are. */
+@media (max-width: 620px) {
+  .pageMark { display: none; }
+  .pageBar { grid-template-columns: 1fr auto; }
+}
+
 /* -- light ---------------------------------------------------------------
    Sunlight at dawn, moonlight at dusk. Two layers: a soft radial pool where
    the light source sits, and angled shafts fanning out from it.
@@ -199,8 +303,26 @@
 }
 
 /* -- grain -------------------------------------------------------------
-   The layer that fuses separately-painted assets into one image. Procedural
-   feTurbulence, so it costs no asset and never fails to load. */
+   The paper the whole site is printed on: the layer that fuses separately
+   painted assets, live gradients and 11px type into one image.
+
+   Two things were keeping it invisible, and both are undone here.
+
+   It was blended. `overlay` multiplies below mid grey and screens above it,
+   which means it fades out at BOTH ends of the range and only has anything to
+   say in the midtones -- and this garden is cream paper, pale sky and light
+   green meadow, nearly all of it at the light end. It showed faintly on the
+   grass and nowhere else. Plain compositing lays the same speckle over every
+   value in the frame, which is what paper does.
+
+   And the noise was in colour, and see-through. feTurbulence generates all
+   four channels, so what it makes is red, green and blue speckle at varying
+   alpha -- chroma noise, the artefact of a bad sensor, not the tooth of a
+   sheet of paper. The two filter stages after it take the saturation out and
+   force alpha to 1, which turns the same turbulence into flat, fully opaque
+   grey grain. That is the film-grain plate every site doing this well is
+   using; procedural is the only difference, and it costs no asset, no request
+   and no third party. */
 
 .grain {
   position: fixed;
@@ -211,8 +333,7 @@
   z-index: var(--z-grain);
   pointer-events: none;
   opacity: 0;
-  mix-blend-mode: var(--grain-blend);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
   will-change: transform;
 }
 

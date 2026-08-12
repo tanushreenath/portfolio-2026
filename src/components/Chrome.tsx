@@ -124,6 +124,37 @@ export function ContactCorner({
 }
 
 /**
+ * The header for a page away from the garden.
+ *
+ * Three things and no more, which is the same restraint the garden's corners
+ * keep: the way back, where you are, and whose site this is. It is furniture,
+ * so it is fixed to the viewport rather than set in the page's column -- the
+ * content scrolls underneath it and fades out into the paper as it goes.
+ */
+export function PageBar({
+  title,
+  handle,
+  onBack,
+}: {
+  title: string;
+  handle: string;
+  onBack: () => void;
+}) {
+  return (
+    <header className={styles.pageBar}>
+      <button type="button" className={styles.pageBack} onClick={onBack}>
+        <span className={styles.pageBackArrow} aria-hidden>
+          ↰
+        </span>
+        Back
+      </button>
+      <h1 className={styles.pageWhere}>{title}</h1>
+      <p className={styles.pageMark}>{handle}</p>
+    </header>
+  );
+}
+
+/**
  * The scene's light: a warm low sun at dawn, a cold high moon at dusk.
  *
  * Sits above the artwork but below the type, so it grades the paintings

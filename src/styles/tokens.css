@@ -45,17 +45,85 @@
   /* Only ever used inside the scene, on painted surfaces. This is a hand, not a
      third type size -- the three above still govern every piece of UI type. */
   --font-hand: "Schoolbell", var(--font-serif);
+  /* The pages away from the garden, where type is read at 15-28px rather than
+     glanced at at 11.
+   *
+   * `ui-rounded` first, and that is the whole point: on a Mac it resolves to SF
+   * Rounded, which is the soft geometric sans the /work wireframes are drawn
+   * in -- and it costs nothing, because it is already on the machine. The
+   * garden loads no third-party anything, and a webfont for one page would be
+   * the first exception.
+   *
+   * Everywhere else the stack falls through to whatever that system's own
+   * interface face is. That is a deliberate near-miss rather than a fallback
+   * chain aiming at one look: this is a page of body text, and a system sans is
+   * never the wrong shape for one.
+   *
+   * The mono stays where it was. At 11px in a corner it reads as a caption
+   * pinned to a painting; at 17px across a 1030px column it reads as a
+   * terminal, which is why the pages do not use it for anything but a number. */
+  --font-sans: ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display",
+    "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
 
   --tracking: 0.02em;
 
+  /* -- reading type ------------------------------------------------------
+     The three sizes above are the garden's, and the rule that there are only
+     three of them is about the garden: everything there is a label floating
+     beside a painting, and 11-14px is what keeps type from competing with the
+     artwork it is standing on.
+
+     A page of case studies is the other job. It is read rather than glanced
+     at, there is no painting to defer to, and 12px body copy over a 1030px
+     column would be unreadable however restrained it looked. So the pages get
+     their own scale -- five sizes, each with one role, none of them borrowed
+     from the scene:
+
+       --read-xs   captions, the fig. line, metric labels
+       --read-sm   body copy
+       --read-md   the index rows, subtitles, role
+       --read-lg   a case study's opening claim
+       --read-xl   the project's name, the one heading on the page
+
+     --read-xl is fluid because it is the only size large enough for the
+     difference between a 1440 screen and a 380 one to matter. */
+  --read-xs: 13px;
+  --read-sm: 15px;
+  --read-md: 17px;
+  --read-lg: 20px;
+  --read-xl: clamp(22px, 1.9vw, 28px);
+
+  /* The measure a page is set to. One column, centred, at every size above
+     the point where the margins would eat it. */
+  --column: 1030px;
+
+  /* A hairline between rows. Mixed from the ink rather than stated as a
+     colour, so it is the same rule at dawn and at dusk without either mood
+     having to name it -- and so it can never disagree with the type sitting
+     above it. */
+  --rule: color-mix(in srgb, var(--ink) 20%, transparent);
+
+  /* Out fast, settle slow. Everything that opens, moves or slides on a page
+     shares it, which is most of what makes the accordion and the strip feel
+     like one mechanism rather than several. */
+  --ease-out: cubic-bezier(0.22, 0.8, 0.28, 1);
+
   /* -- stacking ---------------------------------------------------------
-     Light and grain grade the artwork and must never reach the text: every
-     tinted layer sits below --z-label, and every piece of type above it. */
+     The light grades the artwork and must never reach the text: it sits below
+     --z-label, and every piece of type above it. A wash that lifted 11px of
+     type as well as the meadow behind it would only take the contrast back
+     out of the type.
+
+     The grain is the exception, and sits above everything but the cursor. It
+     is not a wash -- it is the paper the whole site is printed on, and paper
+     goes under the ink or over the picture, never between the two. Held below
+     --z-cursor because the cursor is the one thing that is not printed: it is
+     in the room, not on the page. */
   --z-light: 400;
-  --z-grain: 450;
   --z-label: 620;
   --z-chrome: 650;
   --z-dialog: 800;
+  --z-grain: 850;
   /* Above everything, including a dialog: it is standing in for the pointer,
      and a pointer is never behind anything. */
   --z-cursor: 900;
@@ -137,9 +205,22 @@
   --ground-tint: rgba(255, 244, 214, 0.1);
   /* How strongly the sky half of the meadow is darkened. Nothing by day. */
   --sky-shade: 0;
-  --grain-opacity: 0.07;
-  --grain-blend: overlay;
+  /* Composited plainly now (see .grain in Chrome.module.css), so this is the
+     whole strength control and it does two things at once: it sets how much
+     texture there is, and -- because opaque grey grain over cream pulls the
+     cream very slightly toward grey -- how much of the paper's warmth it
+     costs. This is deliberately past the point where it is merely felt: the
+     grain is meant to be seen as the surface the garden is printed on. */
+  --grain-opacity: 0.0;
   --stars-opacity: 0;
+
+  /* A plate in a case study's strip: the card a screenshot is mounted on.
+     Lighter than the paper at dawn and lighter than the night at dusk, because
+     in both moods it is a lit surface lying on top of the page rather than a
+     hole cut into it. Stated per mood rather than mixed from --paper, since
+     "lighter" means two different colours here. */
+  --plate: #fffaf2;
+  --plate-edge: rgba(51, 38, 26, 0.08);
 
   /* -- painting grades ----------------------------------------------------
      Three depths of night, applied per painting rather than to the scene as a
@@ -301,8 +382,19 @@
      painting below, where scenery and destinations can be taken down by
      different amounts -- which one filter over the lot could never do. */
   --scene-filter: saturate(1) brightness(1) contrast(1.04);
-  --grain-opacity: 0.1;
-  --grain-blend: soft-light;
+  /* A shade heavier than by day. Grain is easiest to see against a flat dark
+     field, and the night is mostly flat dark field -- but this is also where
+     it earns its keep: it is what keeps a large area of near-black violet from
+     banding. Not more than this, though. Grey grain over a night sky lifts the
+     blacks, and past a point that stops reading as texture and starts reading
+     as a washed-out sky, which takes the stars with it. */
+  --grain-opacity: 0.0;
+
+  /* A plate at night. Still the lit surface -- it sits a little above the
+     violet rather than below it -- but nowhere near the white it is by day,
+     which on this paper would read as a light box rather than as a page. */
+  --plate: #261d42;
+  --plate-edge: rgba(248, 245, 255, 0.1);
 
   /* Ground, path and destinations all sit at one brightness now -- 0.72, which
      is exactly where a hovered destination used to land (0.32 x the 2.25 lift).

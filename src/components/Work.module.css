@@ -1,0 +1,478 @@
+/* Work: an index that opens where it stands.
+
+   The page is one column of rows and one hairline between each. Everything
+   else -- the case study, its plates, its numbers -- lives inside a row and is
+   folded away until asked for, so what a visitor meets first is four lines of
+   type and a great deal of paper. */
+
+.page {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--paper);
+  color: var(--ink);
+  /* The page's own voice. Prose inside a case study answers to the serif; the
+     index, the numbers and every label are set in this. */
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  transition: background 2.4s ease, color 2.4s ease;
+  animation: fade-in 0.5s ease both;
+}
+
+/* Closed, the whole page is one screen: four rows, the toadstools under them,
+   and no scrollbar. Opening a case study is the only thing that makes this
+   page longer than the window -- which is what makes the fold read as an event
+   rather than as a jump to somewhere else.
+
+   Hence the grid rather than fixed padding. The list takes the free row and
+   sits in the middle of it, the toadstools take the fixed one at the foot, and
+   the free row absorbs whatever height the window happens to have. A tall
+   screen gets more paper around the same list; a short one gets less, and
+   nothing has to be cut to fit. */
+.column {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 100dvh;
+  max-width: var(--column);
+  margin: 0 auto;
+  /* The top is clearance for the fixed bar. The bottom is composition. */
+  padding: 104px var(--edge) clamp(20px, 5vh, 64px);
+}
+
+/* Centred in the free row while it fits, and pinned to the top once it does
+   not -- which is what `safe` buys: plain `center` would push the first row up
+   under the page bar and out of reach the moment a case study grew the list
+   past the window. */
+.list {
+  align-self: safe center;
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* The hairline belongs to the row above it, and the last row has none: the
+   list should end on paper rather than on a line drawn under nothing. */
+.item + .item .row {
+  border-top: 1px solid var(--rule);
+}
+
+/* -- a row --------------------------------------------------------------- */
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 24px;
+  /* Fluid, and in vh, because the four rows and the toadstools have to fit one
+     screen together. The row's air is the give in that: a 1200px window gets
+     the full 30px and a 640px laptop takes it down to 14 rather than the page
+     losing its footer or growing a scrollbar. */
+  padding: clamp(14px, 2.4vh, 30px) 0;
+  font-size: var(--read-md);
+  line-height: 1.35;
+  transition: border-color 2.4s ease;
+}
+
+/* The row's own hit area. Absolute, so the row can stay a grid whose middle
+   cell holds a link -- a button is not allowed to contain one.
+ *
+ * The z-index is not decoration and it is not defensive: the labels below are
+ * nudged with `translate` on hover, and an element with a translate paints as
+ * though it were position:relative;z-index:0. Without a number here the moment
+ * a row was reached for its own title would rise above the button covering it
+ * and swallow the click -- the row would light up under the cursor and then do
+ * nothing. See .rowSubText for the other half of the same rule. */
+.toggle {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Every cell moves a little when the row is reached for, and they must not
+   move together: the title leads, the description follows it, the year stays.
+   That tiny disagreement is what makes a row feel like one object being nudged
+   rather than three labels sliding. */
+.rowTitle,
+.rowSubText,
+.rowYear {
+  transition: translate 0.5s var(--ease-out), color 0.4s ease;
+}
+
+.rowTitle {
+  color: var(--ink);
+}
+
+/* Deliberately not the element that moves -- .rowSubText inside it is. A
+   translate here would make this a stacking context, and the arrow it contains
+   would be trapped inside it, underneath the button covering the row: the one
+   part of a row that is supposed to be clickable separately would stop being
+   clickable at all, and only while hovered, which is the only time it is
+   visible. */
+.rowSub {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  color: var(--ink);
+}
+
+.rowSubText {
+  text-wrap: pretty;
+}
+
+/* The way out to the full write-up, and the one part of a row that is not the
+   accordion. It sits above the toggle that covers the row, so a click here
+   leaves the site rather than opening the fold.
+
+   Hidden until the row is reached for. A permanent arrow on every line would
+   turn an index into a link list; arriving on hover, it says what this
+   particular row can also do. */
+.out {
+  position: relative;
+  /* Above the button that covers the row, which is at 2. This is the only
+     thing on a row that does something other than fold it open. */
+  z-index: 3;
+  flex: 0 0 auto;
+  border: 0;
+  padding: 0 2px;
+  color: var(--ink);
+  opacity: 0;
+  translate: -6px 0;
+  transition: opacity 0.4s ease, translate 0.5s var(--ease-out);
+}
+
+.row:hover .out,
+.out:focus-visible,
+.item[data-open] .out {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.out:hover {
+  translate: 2px -2px;
+}
+
+.rowYear {
+  justify-self: end;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Reaching for a row. The nudge is 4px and 2px -- small enough that nothing
+   appears to move, large enough that the row answers. */
+.row:hover .rowTitle,
+.toggle:focus-visible ~ .rowTitle {
+  translate: 4px 0;
+}
+
+.row:hover .rowSubText,
+.toggle:focus-visible ~ .rowSub .rowSubText {
+  translate: 2px 0;
+}
+
+.row:hover .rowYear,
+.toggle:focus-visible ~ .rowYear {
+  color: var(--ink);
+}
+
+/* -- the fold ------------------------------------------------------------
+   Height is animated with a grid track, not with max-height.
+
+   max-height needs a number, and a number large enough for the tallest case
+   study makes every shorter one open at a crawl and then jump -- the easing
+   spends most of its time on height the content does not have. `0fr` to `1fr`
+   interpolates to the content's own height, whatever that turns out to be, so
+   all four open at the same speed and a case study that grows a paragraph
+   needs nothing changed here. */
+
+.reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.62s var(--ease-out);
+}
+
+.item[data-open] .reveal {
+  grid-template-rows: 1fr;
+}
+
+/* `visibility` is what closes the case study for everyone else: it takes the
+   panel out of the accessibility tree and its links out of the tab order,
+   neither of which a height of zero does on its own -- a shut case study would
+   otherwise still be read aloud, and tabbing would land inside a fold nobody
+   can see.
+
+   Delayed on the way out so the content is still there to watch while it
+   collapses, and instant on the way in. */
+.revealInner {
+  overflow: hidden;
+  min-height: 0;
+  visibility: hidden;
+  transition: visibility 0s linear 0.62s;
+}
+
+.item[data-open] .revealInner {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* -- a case study --------------------------------------------------------- */
+
+.case {
+  padding: 4px 0 56px;
+}
+
+/* Everything inside arrives in order rather than all at once: the name, then
+   the line under it, then the plates, then the writing. The stagger is --i,
+   set per element where it is rendered, so the order lives with the markup.
+
+   Held back on the way in and returned instantly on the way out -- a fold
+   closing does not need six things fading in reverse on top of it. */
+.caseHead,
+.caseSub,
+.plates,
+.headline,
+.body,
+.metrics,
+.more {
+  opacity: 0;
+  translate: 0 14px;
+  transition: opacity 0.45s ease, translate 0.55s var(--ease-out);
+}
+
+.item[data-open] .caseHead,
+.item[data-open] .caseSub,
+.item[data-open] .plates,
+.item[data-open] .headline,
+.item[data-open] .body,
+.item[data-open] .metrics,
+.item[data-open] .more {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: calc(120ms + var(--i, 0) * 70ms);
+}
+
+.caseHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 22px 0 0;
+}
+
+.caseTitle {
+  margin: 0;
+  font-size: var(--read-xl);
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+.caseRole {
+  margin: 0;
+  text-align: right;
+  font-size: var(--read-md);
+  color: var(--ink);
+}
+
+/* Where and when, under the role. Quiet by size and colour, because it is the
+   one line here nobody came for and the one line a recruiter reads first. */
+.caseWhere {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--read-xs);
+  color: var(--ink-soft);
+}
+
+.caseSub {
+  margin: 14px 0 0;
+  font-size: var(--read-md);
+  color: var(--ink);
+}
+
+.plates {
+  margin: 34px 0 0;
+}
+
+/* The claim. Serif, and set at a measure short enough to hold two lines --
+   this is the sentence the case study is about, and it is the one place on the
+   page where the type is allowed to be a voice rather than a label. */
+.headline {
+  max-width: 46ch;
+  margin: 40px 0 0;
+  font-family: var(--font-serif);
+  font-size: var(--read-lg);
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.body {
+  max-width: 74ch;
+  margin: 22px 0 0;
+  font-family: var(--font-serif);
+  font-size: var(--read-sm);
+  line-height: 1.75;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+}
+
+.body p {
+  margin: 0 0 12px;
+  text-wrap: pretty;
+}
+
+.body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Outcomes. Laid out as a row that wraps rather than as a grid of columns:
+   there are one, two or three of them depending on the project, and a grid
+   would leave a project with a single number sitting in a third of the page. */
+.metrics {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 56px;
+  margin: 34px 0 0;
+  padding: 0;
+  font-size: var(--read-sm);
+}
+
+.metric {
+  max-width: 34ch;
+}
+
+/* The one weight on the page. A number is the only thing here that is a
+   claim, and the sentence around it is the caption to the claim. */
+.metricValue {
+  font-size: var(--read-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.metricLabel {
+  color: var(--ink-soft);
+}
+
+.more {
+  margin: 30px 0 0;
+  font-size: var(--read-xs);
+}
+
+.moreLink {
+  border-bottom-color: color-mix(in srgb, var(--ink) 30%, transparent);
+  color: var(--ink-soft);
+  transition: color 0.35s ease, border-color 0.35s ease;
+}
+
+.moreLink:hover {
+  color: var(--ink);
+}
+
+/* -- the foot ------------------------------------------------------------- */
+
+/* The toadstools that are the way in to this page, standing at the end of it.
+   Same paintings, same sway, same clock as the garden -- see Cluster in
+   Work.tsx. */
+/* Sized in vh for the same reason the rows are, and it is nearly square, so
+   its width is also its height to within a few percent. */
+.cluster {
+  position: relative;
+  width: clamp(112px, 17vh, 178px);
+  margin: clamp(24px, 6vh, 84px) auto 0;
+  animation: fade-in 1.2s 0.6s ease both;
+}
+
+.part {
+  position: absolute;
+  display: block;
+  /* Centred on its x and standing on its y, exactly as in the scene. */
+  translate: -50% -100%;
+}
+
+.sway {
+  display: block;
+  will-change: transform;
+}
+
+/* The night falls on these as it falls on the garden they came from. */
+.paint {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: var(--object-grade);
+  transition: filter 2.4s ease;
+}
+
+/* -- narrow --------------------------------------------------------------
+   One breakpoint, and it does one thing: the row stops being three columns
+   and becomes two lines. Below about 720px the description has nowhere to go
+   -- it wraps to three lines inside a column 200px wide and the year drifts
+   away from the title it belongs to. */
+
+@media (max-width: 760px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 16px;
+    /* Two lines instead of one, so each row buys back some of its own air. */
+    padding: clamp(12px, 2vh, 24px) 0;
+  }
+
+  /* Block rather than a flex row, so the arrow follows the last word instead
+     of standing off to the side of a description that has wrapped. */
+  .rowSub {
+    display: block;
+    grid-column: 1;
+    color: var(--ink-soft);
+    font-size: var(--read-sm);
+  }
+
+  .out {
+    display: inline-block;
+    margin-left: 8px;
+  }
+
+  .rowYear {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  /* Nothing here can be hovered, so the way out cannot wait to be reached
+     for. */
+  .out {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .caseHead {
+    display: block;
+  }
+
+  .caseRole {
+    margin-top: 10px;
+    text-align: left;
+  }
+}

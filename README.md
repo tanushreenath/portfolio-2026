@@ -183,11 +183,46 @@ Dusk is made rather than drawn, since there is only one painting of a sunlit
 field: `--ground-filter` takes the light down and the colour out, and
 `--ground-tint` lays the night blue over the top.
 
+## Work
+
+`/work` is an index of four case studies that open where they stand: clicking a
+row unfolds the case study between that row and the next, one at a time, and
+the list never leaves. Closed, the whole page is exactly one screen — four
+rows and the toadstool cluster — which is why its vertical rhythm is set in
+`vh` rather than in pixels. Opening a case study is the only thing that gives
+the page a scrollbar.
+
+Everything on it comes from `content.work`, including the figures. A figure
+without an `asset` is not a gap and not a broken image: it renders as a plate
+labelled with what will be mounted on it, so the strip is complete before the
+screenshots exist. Adding a real one is a file drop plus one line in the
+registry — see below — and nothing in `Work.tsx` or `Figures.tsx` changes.
+
+Three details worth knowing before editing it:
+
+- **The fold is a grid track**, `0fr` to `1fr`, not a `max-height`. A max-height
+  needs a number large enough for the tallest case study, which makes every
+  shorter one open at a crawl and then jump.
+- **`visibility`, not height, is what closes a case study** for a screen reader
+  and for the tab key. A panel at zero height is still read aloud and still
+  focusable.
+- **The row's labels are nudged with `translate` on hover, so the button
+  covering the row carries a `z-index`.** An element with a translate paints as
+  though it were `position: relative; z-index: 0` — without the number the
+  title rises above the button the moment you reach for it and swallows the
+  click. Same reason the arrow out to the full write-up sits above both, and
+  the reason `.rowSub` itself never moves: a stacking context there would trap
+  the arrow underneath the button.
+
+Work still held in `content.otherWork` is deliberately not rendered. Each of
+those is already described from the employer's side in `content.experience`,
+and the index is four rows deep on purpose.
+
 ## Adding artwork
 
-The nine resume-derived projects live in `content.work`, ready for the /work
-page's design. A part whose asset is missing from the registry is skipped at
-render time rather than breaking the scene.
+A part whose asset is missing from the registry is skipped at render time
+rather than breaking the scene, and a case study figure without one renders as
+a labelled plate.
 
 To add one:
 
@@ -204,8 +239,14 @@ To add one:
   `/about`, `/playground`) handled by a ~25-line hook rather than a router.
   Because these are real paths, **a static host must fall back to index.html**
   for unknown paths, or a direct visit to /work will 404.
-- **No animation library, and no JavaScript animation at all.** Every movement
-  is a CSS keyframe over layered images.
+- **No animation library.** Everything in the garden is a CSS keyframe over
+  layered images, and every state change on a page is a CSS transition. The two
+  exceptions are both on `/work`, and both are cases where the destination is
+  not known in advance: the momentum a dragged figure strip carries after the
+  mouse lets go, and the scroll that brings an opening case study to rest while
+  the accordion above it is still collapsing. Each is a `requestAnimationFrame`
+  loop that re-reads the target every frame — see `Figures.tsx` and `useSettle`
+  in `Work.tsx`.
 - **Assets are used exactly as delivered.** No keying, no background removal, no
   glow or shadow passes. `imagetools` converts and resizes at build time, so the
   sources on disk are never rewritten — 14MB of PNG ships as ~1.1MB of WebP.
@@ -230,9 +271,11 @@ Conventions worth knowing before editing CSS:
 - Objects are centred with the **`translate` property**, never `transform`. The
   enter animation animates `transform` with `fill-mode: both`, which would
   otherwise override the centring once the reveal finished.
-- The **light layer** (a wide amber sun at dawn, a small cold moon at dusk) sits
-  above the artwork but below type, and is not rendered on `/work`, `/about` or
-  `/playground` — over body copy it destroys contrast. Both layers blend with
+- **Neither the light nor the grain leaves the garden.** Both exist to fuse
+  separately-painted artwork into one image, and a page away from the scene has
+  no artwork to fuse: the light layer (a wide amber sun at dawn, a small cold
+  moon at dusk) destroys the contrast of body copy, and the grain lands on the
+  letterforms. The light sits above the artwork but below type, Both layers blend with
   `screen`, which is why the dawn light is warm rather than white: screening
   white over cream paper only raises its value and flattens the scene into haze,
   where an amber beam keeps a hue of its own and reads as air.
