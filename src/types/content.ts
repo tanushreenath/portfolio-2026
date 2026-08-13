@@ -192,6 +192,19 @@ export interface SceneObjectData {
    * in px would be a different lift on every screen.
    */
   labelLift?: number;
+  /**
+   * Measure the reveal from one part of a cluster rather than from all of it.
+   * Names the part's `asset`; omitted, the label is placed off the whole
+   * object, which is the right answer for most of them.
+   *
+   * The toadstools are why this exists. Three mushrooms with the tall red one
+   * in the middle: the union of the three is much wider than the thing your
+   * eye actually goes to, so a right-hand label measured from it started
+   * beyond the small blue mushroom and read as floating in the meadow rather
+   * than as belonging to the cluster. Anchored to the red one, the same gap
+   * puts it where a label on a single object would sit.
+   */
+  labelAnchor?: string;
 }
 
 /**
@@ -295,9 +308,6 @@ export interface ProfileLink {
 
 export interface Profile {
   name: string;
-  /** The name she goes by everywhere that is not a signature. It is what sits
-   *  in the top right of every page away from the garden. */
-  handle: string;
   title: string;
   location: string;
   welcome: { greeting: string; sub: string };

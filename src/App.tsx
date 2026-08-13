@@ -105,12 +105,30 @@ export default function App() {
   // separately-painted artwork into one image, and away from the scene there
   // is no artwork to fuse: over body copy the light washes out the contrast
   // and the grain lands on the letterforms.
+  // The mood is the one piece of state that belongs to the whole site rather
+  // than to the garden: it is written to the document element and every page
+  // is painted out of the same tokens, so the control travels with the
+  // visitor instead of being something they have to go home to find.
   if (route === "/work") {
-    return <Work content={content} onBack={() => go("/")} />;
+    return (
+      <Work
+        content={content}
+        mood={mood as Mood}
+        onMood={setMood}
+        onBack={() => go("/")}
+      />
+    );
   }
 
   if (route !== "/") {
-    return <Page {...PAGES[route]} onBack={() => go("/")} />;
+    return (
+      <Page
+        {...PAGES[route]}
+        mood={mood as Mood}
+        onMood={setMood}
+        onBack={() => go("/")}
+      />
+    );
   }
 
   return (

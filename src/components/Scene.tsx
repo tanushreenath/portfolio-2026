@@ -55,15 +55,29 @@ const LABEL_GAP = 26;
  * left. Measuring a label's gap from the DOM rect therefore puts it a different
  * distance from the visible edge for every object. These bounds are generated
  * by scripts/genbounds.mjs from the alpha channel of each source PNG.
+ *
+ * By default this is the union of every part. An object may name one part as
+ * its labelAnchor and be measured from that alone -- see the field's note in
+ * types/content.ts. An anchor naming a part that is not there unions nothing,
+ * and the guard at the end hands back the DOM box, which is the same answer
+ * this function gave before any of it existed.
  */
 function artworkRect(data: SceneObjectData, box: DOMRect) {
+  // Read off the full parts list, never off the filtered one below: each
+  // part's x/y/w are percentages of the object's box and only mean anything
+  // when the object is a cluster. Anchoring to one of three mushrooms does not
+  // turn the object into a single-part painting.
   const clustered = data.parts.length > 1;
+  const parts = data.labelAnchor
+    ? data.parts.filter((p) => p.asset === data.labelAnchor)
+    : data.parts;
+
   let left = Infinity;
   let right = -Infinity;
   let top = Infinity;
   let bottom = -Infinity;
 
-  for (const part of data.parts) {
+  for (const part of parts) {
     const b = bounds[part.asset];
     if (!b) continue;
 
@@ -205,6 +219,7 @@ export function Scene({
   }, [active]);
 
   return (
+    <>
     <div
       ref={ref}
       className={[
@@ -251,17 +266,28 @@ export function Scene({
           lamp's light is not dimmed by the dark it is cutting through. */}
       <div className={styles.vignette} aria-hidden />
       <div className={styles.glow} aria-hidden />
-
-      {active && labelBox && (
-        <div
-          className={`${styles.label} anim-fade-in`}
-          style={labelBox}
-          aria-hidden
-        >
-          <p className={styles.labelTitle}>{active.label.title}</p>
-          <p className={styles.labelMeta}>{active.label.meta}</p>
-        </div>
-      )}
     </div>
+
+    {/* OUTSIDE .scene, and that placement is the whole point.
+     *
+     * The label is fixed and positioned from a measured rect, so it does not
+     * need an ancestor -- and it must not have this one. .scene is
+     * position:fixed, which makes it a stacking context, so every z-index
+     * inside it sorts only against its own siblings. --z-label is 620 and the
+     * sun's shafts are 400, but the comparison that actually ran was .scene's
+     * own `auto` against the shafts' 400: the whole garden lost, and the light
+     * washed over the one piece of type standing in it. Out here the 620 is
+     * measured against the 400 it was written for. */}
+    {active && labelBox && (
+      <div
+        className={`${styles.label} anim-fade-in`}
+        style={labelBox}
+        aria-hidden
+      >
+        <p className={styles.labelTitle}>{active.label.title}</p>
+        <p className={styles.labelMeta}>{active.label.meta}</p>
+      </div>
+    )}
+    </>
   );
 }

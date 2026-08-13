@@ -198,6 +198,23 @@ labelled with what will be mounted on it, so the strip is complete before the
 screenshots exist. Adding a real one is a file drop plus one line in the
 registry — see below — and nothing in `Work.tsx` or `Figures.tsx` changes.
 
+It is set in the site's own type and no other: 13px for the way back and the
+labels, 14px for a subtitle, 16px for a row, a case study's name and the page
+bar's title — the same three sizes the garden uses. Only running prose steps
+outside them, at 19px for a case study's claim and 17px for its paragraphs,
+which is About's body exactly. There was briefly a whole separate "reading
+scale" here, on the argument that a case study is read rather than glanced at;
+it was a real argument and it still produced a page that did not look like the
+rest of the site.
+
+One face carries all of it: **Quicksand**, self-hosted from
+`src/assets/fonts/quicksand-latin.woff2` on the same terms as Schoolbell — one
+variable file, 300–700, latin subset, no request to Google. The site's normal
+weight is 500 and anything at the label size takes 600 (`--weight-body` /
+`--weight-label` in `tokens.css`); Quicksand's 400 is a display weight and goes
+thin below about 16px, which is also why the three sizes are 13/14/16 rather
+than the 11/12/14 they were under the old mono.
+
 Three details worth knowing before editing it:
 
 - **The fold is a grid track**, `0fr` to `1fr`, not a `max-height`. A max-height

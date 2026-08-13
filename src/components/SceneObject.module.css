@@ -325,10 +325,12 @@
    Inset from the panel because the painted board has a ragged watercolour edge
    and lettering run right up to it would look printed rather than brushed.
 
-   The grade is the same one .image takes, on the same 2.4s clock, so night
-   falls on the ink and on the board it is painted on together. Without it the
-   words would stay at full strength over a board dropping to 0.72 brightness --
-   the lettering would appear to glow as the sun went down. */
+   NO GRADE ON THIS, and that is the rule rather than an omission: nothing the
+   light does to the garden is allowed to reach a letterform. This carried
+   --scenery-grade so the ink would fall to 0.72 brightness with the board it
+   is painted on -- consistent as a painting, and the one piece of readable
+   copy on the site that got darker as the sun went down. The board still
+   grades; the words on it hold. */
 .signText {
   position: absolute;
   translate: -50% -50%;
@@ -344,8 +346,6 @@
   text-align: center;
   text-wrap: balance;
   pointer-events: none;
-  filter: var(--scenery-grade);
-  transition: filter 2.4s ease;
 }
 
 .signLine {

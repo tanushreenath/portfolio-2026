@@ -5,10 +5,40 @@
   inset: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--paper);
+  /* NO BACKGROUND HERE, and this is not an oversight.
+   *
+   * The paper is painted by the canvas -- body carries it, on the same 2.4s
+   * clock -- and this element is deliberately transparent so that it shows
+   * through. Painting it here instead is the obvious thing and it is broken in
+   * a way that only appears once a case study is open: this element is the
+   * scroller, and as soon as its content is taller than the window Chrome
+   * paints the fill into a tiled scrolling layer that it does not re-raster
+   * while a colour transition runs. The measured symptom was exact -- the
+   * computed background reported mid-grey while the pixels on screen were
+   * still full daylight, so the type, the rules and the plates changed mood
+   * and the paper behind them did not, then caught up in one jump at the end.
+   *
+   * The canvas has no such problem: it is one flat surface, and it is the one
+   * thing on the page guaranteed to be repainted every frame. */
   color: var(--ink);
-  transition: background 2.4s ease, color 2.4s ease;
+  transition: color 2.4s ease;
   animation: fade-in 0.4s ease both;
+}
+
+/* ONE CLOCK FOR THE LIGHT.
+ *
+ * Every colour on a page belongs to the mood, and the mood takes 2.4 seconds.
+ * This is the floor that says so, so that a rule, a caption, a metric label and
+ * the paper behind them all arrive at night together instead of the background
+ * easing while everything printed on it cuts.
+ *
+ * `:where()` because this must lose every argument it has. It carries zero
+ * specificity, so any rule that names an element -- a plate's own background, a
+ * row's hairline, a caption -- overrides it whatever order the modules happen to
+ * be bundled in. It is a default, not a policy, and the handful of elements that
+ * declare their own transition state their colour clock inside it. */
+:where(.page *, .page *::before, .page *::after) {
+  transition: color 2.4s ease, background-color 2.4s ease, border-color 2.4s ease;
 }
 
 .inner {
@@ -17,42 +47,22 @@
   padding: 18vh var(--edge) 12vh;
 }
 
-.back {
-  position: fixed;
-  top: var(--edge);
-  left: var(--edge);
-  z-index: 10;
-  border: 0;
-  background: none;
-  padding: 0;
-  font: inherit;
-  font-size: var(--type-sm);
-  letter-spacing: var(--tracking);
-  /* The only way out of a page, so it holds full ink rather than the muted
-     tone used for passive corner text. */
-  color: var(--ink);
-  opacity: 0.9;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-}
-
-.back:hover { opacity: 1; }
-
 .eyebrow {
   font-size: var(--type-sm);
+  font-weight: var(--weight-label);
   color: var(--ink-soft);
   margin: 0 0 12px;
 }
 
 .title {
   font-size: var(--type-lg);
-  font-weight: 400;
+  font-weight: var(--weight-body);
   margin: 0 0 28px;
 }
 
 .body {
-  font-family: var(--font-serif);
-  font-size: 15px;
+  font-family: var(--font-sans);
+  font-size: 17px;
   line-height: 1.65;
   letter-spacing: 0;
   margin: 0 0 24px;
@@ -64,6 +74,7 @@
   padding: 28px 0 0;
   border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
   font-size: var(--type-sm);
+  font-weight: var(--weight-label);
   color: var(--ink-soft);
   line-height: 1.7;
 }

@@ -394,6 +394,8 @@
 
 .labelTitle {
   font-size: var(--type-md);
+  /* Over grass, with nothing laid behind it. Same reason as the corners. */
+  font-weight: var(--weight-label);
   color: var(--ink);
   margin: 0;
   line-height: 1.4;
@@ -401,6 +403,7 @@
 
 .labelMeta {
   font-size: var(--type-sm);
+  font-weight: var(--weight-label);
   color: var(--ink-soft);
   margin: 2px 0 0;
   line-height: 1.4;

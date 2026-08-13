@@ -60,7 +60,35 @@ export function Welcome({ profile, dimmed }: { profile: Profile; dimmed: boolean
  *
  * Held controlled: `toggled` follows the mood, so the icon can never disagree
  * with the scene, including when the mood is restored from storage on load.
+ *
+ * The control on its own, with no position of its own: the light is changed
+ * from the garden's corner and from a page's bar, and those are two different
+ * places to stand. Everything that makes it the same control in both lives
+ * here; everything that places it lives in whichever furniture is hosting it.
  */
+export function MoodControl({
+  current,
+  onChange,
+  className,
+}: {
+  current: Mood;
+  onChange: (m: Mood) => void;
+  className?: string;
+}) {
+  const dusk = current === "dusk";
+  return (
+    <Around
+      className={`${styles.mood} ${className ?? ""}`}
+      toggled={dusk}
+      onToggle={(on) => onChange(on ? "dusk" : "dawn")}
+      duration={750}
+      aria-label={dusk ? "Switch to dawn" : "Switch to dusk"}
+      title={dusk ? "Switch to dawn" : "Switch to dusk"}
+    />
+  );
+}
+
+/** The garden's copy, in the top right corner. */
 export function MoodToggle({
   current,
   onChange,
@@ -68,17 +96,9 @@ export function MoodToggle({
   current: Mood;
   onChange: (m: Mood) => void;
 }) {
-  const dusk = current === "dusk";
   return (
     <div className={`${styles.corner} ${styles.topRight} ${styles.moods}`}>
-      <Around
-        className={styles.mood}
-        toggled={dusk}
-        onToggle={(on) => onChange(on ? "dusk" : "dawn")}
-        duration={750}
-        aria-label={dusk ? "Switch to dawn" : "Switch to dusk"}
-        title={dusk ? "Switch to dawn" : "Switch to dusk"}
-      />
+      <MoodControl current={current} onChange={onChange} />
     </div>
   );
 }
@@ -133,23 +153,25 @@ export function ContactCorner({
  */
 export function PageBar({
   title,
-  handle,
+  mood,
+  onMood,
   onBack,
 }: {
-  title: string;
-  handle: string;
+  /** Shown centred. Omitted by a page that names itself in its own column. */
+  title?: string;
+  mood: Mood;
+  onMood: (m: Mood) => void;
   onBack: () => void;
 }) {
   return (
     <header className={styles.pageBar}>
       <button type="button" className={styles.pageBack} onClick={onBack}>
-        <span className={styles.pageBackArrow} aria-hidden>
-          ↰
-        </span>
-        Back
+        ← back to the garden
       </button>
-      <h1 className={styles.pageWhere}>{title}</h1>
-      <p className={styles.pageMark}>{handle}</p>
+      {title ? <h1 className={styles.pageWhere}>{title}</h1> : <span />}
+      {/* The same control the garden keeps in this corner, at the same size.
+          Someone who has found it once should not have to look for it again. */}
+      <MoodControl current={mood} onChange={onMood} className={styles.pageMood} />
     </header>
   );
 }

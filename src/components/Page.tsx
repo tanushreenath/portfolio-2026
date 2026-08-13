@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import type { Mood } from "../types/content";
+import { PageBar } from "./Chrome";
 import styles from "./Page.module.css";
 
 interface Props {
@@ -7,6 +9,8 @@ interface Props {
   intro: string;
   /** What will live here once the design lands. */
   coming: string[];
+  mood: Mood;
+  onMood: (m: Mood) => void;
   onBack: () => void;
   children?: ReactNode;
 }
@@ -19,12 +23,21 @@ interface Props {
  * plainly what is still missing rather than inventing a layout that will be
  * thrown away.
  */
-export function Page({ eyebrow, title, intro, coming, onBack, children }: Props) {
+export function Page({
+  eyebrow,
+  title,
+  intro,
+  coming,
+  mood,
+  onMood,
+  onBack,
+  children,
+}: Props) {
   return (
     <main className={styles.page}>
-      <button type="button" className={styles.back} onClick={onBack}>
-        ← back to the garden
-      </button>
+      {/* No centred title: this page names itself in its own column, a line
+          below the eyebrow, and saying it twice would be saying it twice. */}
+      <PageBar mood={mood} onMood={onMood} onBack={onBack} />
       <div className={styles.inner}>
         <p className={styles.eyebrow}>{eyebrow}</p>
         <h1 className={styles.title}>{title}</h1>

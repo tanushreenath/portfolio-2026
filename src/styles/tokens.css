@@ -11,6 +11,24 @@
      painting without fighting the band.
    ========================================================================== */
 
+/* Quicksand, the voice of every piece of type on the site. OFL, and served from
+   src/assets/fonts on the same terms as the hand below. One variable file
+   covering 300-700, latin subset only, 28kB -- cheaper than the two static
+   weights it replaces would have been.
+
+   `swap` for the same reason as below: the fallback stack is a rounded-ish sans
+   and the layout does not shift enough to be worth a blank first paint. */
+@font-face {
+  font-family: "Quicksand";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("../assets/fonts/quicksand-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* Schoolbell, the hand that writes on the signpost. Apache 2.0, and served from
    src/assets/fonts rather than from fonts.googleapis.com: the garden loads no
    third-party anything, and going out to Google costs two round trips before a
@@ -19,8 +37,7 @@
 
    `swap` because the sign is a painting first. The board is legible artwork
    with or without the hand, so there is no reason to hold the text back while
-   the file arrives; the fallback is the serif stack, which is the closest thing
-   on the machine to ink on wood. */
+   the file arrives; the fallback is the sans stack below. */
 @font-face {
   font-family: "Schoolbell";
   font-style: normal;
@@ -34,64 +51,40 @@
 
 :root {
   /* -- type ------------------------------------------------------------- */
-  --type-sm: 11px;
-  --type-md: 12px;
-  --type-lg: 14px;
+  /* Still three sizes, one notch up from the 11/12/14 they were. A whisper is
+     only a whisper if it is heard: Quicksand carries a smaller x-height than
+     the mono these were set for, so the old numbers rendered a full step
+     quieter than they measured. */
+  --type-sm: 13px;
+  --type-md: 14px;
+  --type-lg: 16px;
 
-  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
-    "Liberation Mono", monospace;
-  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
-    "Times New Roman", serif;
+  /* The other half of the same correction. Quicksand's 400 is a display
+     weight -- fine at 40px, thin at 13 -- so the site's normal is 500 and
+     anything small enough to be read as a label takes 600. Both come free:
+     one variable file covers 300-700. */
+  --weight-body: 500;
+  --weight-label: 600;
+
+  /* One face, everywhere. There were two before -- a mono for the chrome and a
+     serif for the reading -- and the seam between them was visible on every
+     page that had both. Quicksand is round enough to sit next to the painted
+     scene and even enough to read at length. */
+  --font-sans: "Quicksand", "Avenir Next", Avenir, "Segoe UI", system-ui,
+    -apple-system, sans-serif;
   /* Only ever used inside the scene, on painted surfaces. This is a hand, not a
      third type size -- the three above still govern every piece of UI type. */
-  --font-hand: "Schoolbell", var(--font-serif);
-  /* The pages away from the garden, where type is read at 15-28px rather than
-     glanced at at 11.
-   *
-   * `ui-rounded` first, and that is the whole point: on a Mac it resolves to SF
-   * Rounded, which is the soft geometric sans the /work wireframes are drawn
-   * in -- and it costs nothing, because it is already on the machine. The
-   * garden loads no third-party anything, and a webfont for one page would be
-   * the first exception.
-   *
-   * Everywhere else the stack falls through to whatever that system's own
-   * interface face is. That is a deliberate near-miss rather than a fallback
-   * chain aiming at one look: this is a page of body text, and a system sans is
-   * never the wrong shape for one.
-   *
-   * The mono stays where it was. At 11px in a corner it reads as a caption
-   * pinned to a painting; at 17px across a 1030px column it reads as a
-   * terminal, which is why the pages do not use it for anything but a number. */
-  --font-sans: ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display",
-    "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --font-hand: "Schoolbell", var(--font-sans);
 
   --tracking: 0.02em;
 
-  /* -- reading type ------------------------------------------------------
-     The three sizes above are the garden's, and the rule that there are only
-     three of them is about the garden: everything there is a label floating
-     beside a painting, and 11-14px is what keeps type from competing with the
-     artwork it is standing on.
-
-     A page of case studies is the other job. It is read rather than glanced
-     at, there is no painting to defer to, and 12px body copy over a 1030px
-     column would be unreadable however restrained it looked. So the pages get
-     their own scale -- five sizes, each with one role, none of them borrowed
-     from the scene:
-
-       --read-xs   captions, the fig. line, metric labels
-       --read-sm   body copy
-       --read-md   the index rows, subtitles, role
-       --read-lg   a case study's opening claim
-       --read-xl   the project's name, the one heading on the page
-
-     --read-xl is fluid because it is the only size large enough for the
-     difference between a 1440 screen and a 380 one to matter. */
-  --read-xs: 13px;
-  --read-sm: 15px;
-  --read-md: 17px;
-  --read-lg: 20px;
-  --read-xl: clamp(22px, 1.9vw, 28px);
+  /* The pages away from the garden take the three sizes above and nothing
+     else. There was briefly a fourth, fifth and sixth here -- a "reading
+     scale" for /work, on the argument that a case study is read rather than
+     glanced at. It was a real argument and it was still wrong: what it
+     produced was a page that did not look like the rest of the site. The
+     reading sizes named in Work.module.css are the only exception, and the
+     chrome stays at 11, 12 and 14. */
 
   /* The measure a page is set to. One column, centred, at every size above
      the point where the margins would eat it. */
@@ -167,8 +160,11 @@
   /* Secondary type. Note this is where the hierarchy is now made: a second,
      lighter ink rather than a second opacity stacked on the first. Two nested
      opacities multiply, which is how corner text ended up at 0.66 of an ink
-     that was already too light. */
-  --ink-soft: rgba(51, 38, 26, 0.82);
+     that was already too light. 0.9 rather than the 0.82 it was: secondary
+     still reads as secondary at this distance, because the hierarchy is
+     carried by size and position too, and 0.82 of this ink over grass was
+     under 4.5:1. */
+  --ink-soft: rgba(51, 38, 26, 0.9);
   /* ONE CANONICAL FILTER SHAPE, used by every mood-graded layer:
        saturate() brightness() contrast()
 
@@ -211,7 +207,7 @@
      cream very slightly toward grey -- how much of the paper's warmth it
      costs. This is deliberately past the point where it is merely felt: the
      grain is meant to be seen as the surface the garden is printed on. */
-  --grain-opacity: 0.0;
+  --grain-opacity: 0.1;
   --stars-opacity: 0;
 
   /* A plate in a case study's strip: the card a screenshot is mounted on.
@@ -359,7 +355,7 @@
      what lets the night read as a colour rather than as an absence. */
   --paper: #1b1430;
   --ink: rgb(248, 245, 255);
-  --ink-soft: rgba(248, 245, 255, 0.8);
+  --ink-soft: rgba(248, 245, 255, 0.9);
 
   /* Night over the same field: the light goes, the colour stays. Saturation
      holds at 1, so the grass is still the green it was painted -- pulling it
@@ -500,13 +496,17 @@ body {
   overscroll-behavior: none;
 }
 
+/* No `-webkit-font-smoothing: antialiased` here, deliberately. It was set back
+   when the type was a mono with strokes to spare; on a rounded face at 13px it
+   shaves the stems thin enough that the corners read as grey rather than as
+   ink. The default (subpixel) keeps the weight that is actually specified. */
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: var(--type-md);
+  font-weight: var(--weight-body);
   letter-spacing: var(--tracking);
-  -webkit-font-smoothing: antialiased;
   transition: background 2.4s ease, color 2.4s ease;
 }
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { assets } from "../assets/registry";
-import type { Content, SceneObjectData, WorkItem } from "../types/content";
+import type { Content, Mood, SceneObjectData, WorkItem } from "../types/content";
 import { PageBar } from "./Chrome";
 import { Figures } from "./Figures";
 import styles from "./Work.module.css";
@@ -293,7 +293,17 @@ function Row({ item, index, open, onToggle }: RowProps) {
  * One at a time, for the same reason -- two open cases put a screen of
  * scrolling between two rows that are supposed to be read against each other.
  */
-export function Work({ content, onBack }: { content: Content; onBack: () => void }) {
+export function Work({
+  content,
+  mood,
+  onMood,
+  onBack,
+}: {
+  content: Content;
+  mood: Mood;
+  onMood: (m: Mood) => void;
+  onBack: () => void;
+}) {
   const page = useRef<HTMLElement>(null);
   const [open, setOpen] = useState<string | null>(null);
   const { settle, stop } = useSettle(page);
@@ -314,7 +324,7 @@ export function Work({ content, onBack }: { content: Content; onBack: () => void
 
   return (
     <>
-      <PageBar title="Work" handle={content.profile.handle} onBack={onBack} />
+      <PageBar title="Work" mood={mood} onMood={onMood} onBack={onBack} />
 
       <main
         className={styles.page}

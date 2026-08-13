@@ -13,6 +13,9 @@
   position: fixed;
   z-index: var(--z-chrome);
   font-size: var(--type-sm);
+  /* The corners stand on grass, not on paper, and they are the smallest type
+     on the site. They take the label weight for both reasons. */
+  font-weight: var(--weight-label);
   color: var(--ink);
   line-height: 1.5;
   transition: opacity 0.5s ease, color 2.4s ease;
@@ -85,6 +88,7 @@
   top: calc(var(--edge) + 58px);
   z-index: var(--z-chrome);
   font-size: var(--type-sm);
+  font-weight: var(--weight-label);
   color: var(--ink-soft);
   pointer-events: none;
 }
@@ -99,12 +103,13 @@
   font-size: var(--type-sm);
   letter-spacing: var(--tracking);
   color: inherit;
-  opacity: 0.9;
   cursor: pointer;
   transition: opacity 0.3s ease;
 }
 
-.link:hover { opacity: 1; }
+/* At rest it is simply the corner's ink -- see the note at the top of this
+   file about opacities multiplying. The hover cue is the underline. */
+.link:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 /* -- help ---------------------------------------------------------------- */
 
@@ -125,7 +130,7 @@
   border-radius: 50%;
   background: none;
   font: inherit;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1;
   color: inherit;
   opacity: 0.9;
@@ -140,16 +145,28 @@
 
 /* -- page bar -------------------------------------------------------------
    The header every page away from the garden wears: the way back, where you
-   are, and whose site this is.
+   are, and the light.
 
-   Fixed, and reaching the full width rather than sitting in the page's column,
-   because it is furniture and not content -- the same three corners the garden
-   has, pulled onto one line.
+   It is the garden's own corners pulled onto one line, and it is set in the
+   garden's own type -- 11px for the way back, 14px for the title. A page
+   here is a quieter room in the same house, not a different site, and nothing
+   about its furniture should announce otherwise.
 
-   It has no background of its own. A bar with a paper fill would draw a hard
-   edge across the page the moment anything scrolled under it, so the paper is
-   faded out instead: opaque behind the type, gone by the bottom of the mask.
-   Type passing underneath dissolves rather than being cut. */
+   No hard background. A bar with a flat paper fill would draw an edge across
+   the page the moment anything scrolled under it, so the paper fades out
+   instead: opaque behind the type, gone by the bottom. What passes underneath
+   dissolves rather than being cut -- which on /work is a 400px plate, hence a
+   fade this long.
+
+   THE FADE IS A MASK, NOT A GRADIENT, and that is the whole reason this reads
+   as one page at a change of light. Written the obvious way -- a
+   `linear-gradient(var(--paper), transparent)` -- the fade is a background
+   IMAGE, and background-image does not interpolate: at dusk the bar snapped to
+   night in a single frame and then sat there, a hard dark slab across the top,
+   while the 2.4s underneath it caught up. Here the colour is a plain
+   background-color, which animates like every other surface on the site, and
+   the shape it fades through is a mask that carries no colour at all and so
+   has nothing to animate. */
 
 .pageBar {
   position: fixed;
@@ -162,84 +179,84 @@
   align-items: start;
   gap: 16px;
   padding: var(--edge) var(--edge) 40px;
-  /* Long, and opaque well past the type. What passes underneath is not always
-     11px of body copy -- on /work it is a 400px white plate, and a short fade
-     would let one drift up behind the word "Work" still bright enough to read
-     the caption on. */
-  background: linear-gradient(
+  /* The fade is a wash of paper, and paper is not a surface you can click
+     through to. Only the two controls take the pointer. */
+  pointer-events: none;
+}
+
+/* The wash itself, behind the type rather than over it: the mask belongs to
+   the paper alone, and a mask on the bar would cut into its own lettering the
+   moment the type grew past the first stop. Negative z-index is safe here --
+   the bar carries --z-chrome, so this can only fall behind its own children,
+   never behind the page. */
+.pageBar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--paper);
+  -webkit-mask-image: linear-gradient(
     to bottom,
-    var(--paper) 0%,
-    var(--paper) 62%,
-    color-mix(in srgb, var(--paper) 72%, transparent) 82%,
+    #000 0%,
+    #000 62%,
+    rgba(0, 0, 0, 0.72) 82%,
     transparent 100%
   );
-  /* The fade is a wash of paper, and paper is not a surface you can click
-     through to. Only the three controls take the pointer. */
-  pointer-events: none;
-  transition: background 2.4s ease;
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 62%,
+    rgba(0, 0, 0, 0.72) 82%,
+    transparent 100%
+  );
+  transition: background-color 2.4s ease;
 }
 
 .pageBar > * {
   pointer-events: auto;
   margin: 0;
-  font-family: var(--font-sans);
-  font-size: var(--read-md);
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1;
+  line-height: 1.5;
 }
 
-/* Back, home and the wordmark all sit on one optical line. The wordmark is the
-   only one that is not a control, so it alone is not a button. */
+/* The only way out of a page, so it holds full ink rather than the muted tone
+   used for passive corner text. Deliberately the same words, size and
+   behaviour as every other page's -- see .back in Page.module.css, which this
+   replaced. */
 .pageBack {
   justify-self: start;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   border: 0;
   padding: 0;
   background: none;
-  /* Set out rather than inherited: `font: inherit` is the usual way to strip a
-     button's UA type, and it would take the family back to the body's mono --
-     the bar sets its own, one rule above. */
-  font-family: var(--font-sans);
-  font-size: var(--read-md);
-  letter-spacing: 0;
+  font: inherit;
+  font-size: var(--type-sm);
+  font-weight: var(--weight-label);
+  letter-spacing: var(--tracking);
   color: var(--ink);
   cursor: pointer;
-  transition: color 2.4s ease;
+  transition: opacity 0.3s ease, color 2.4s ease;
 }
 
-/* Only the arrow moves. Sliding the whole control would shift the word it is
-   attached to, and a label that moves on hover reads as a layout fault; an
-   arrow that leans toward where it goes reads as an answer. */
-.pageBackArrow {
-  display: inline-block;
-  transition: translate 0.4s var(--ease-out);
-}
+/* Full ink at rest. This is the only way out of a page -- it was the one
+   control on the site wearing a permanent 10% fade, and 10% off an already
+   small label is exactly the kind of quiet the corners gave up. The hover
+   still has somewhere to go: it goes the other way, and underlines. */
+.pageBack:hover { text-decoration: underline; text-underline-offset: 4px; }
 
-.pageBack:hover .pageBackArrow,
-.pageBack:focus-visible .pageBackArrow {
-  translate: -4px 0;
-}
-
+/* Where you are. One size up from the way back and no other difference: it is
+   a label, not a banner, and the page below it is what the visitor came for. */
 .pageWhere {
   justify-self: center;
+  font-size: var(--type-lg);
+  font-weight: var(--weight-body);
+  letter-spacing: var(--tracking);
   color: var(--ink);
 }
 
-.pageMark {
+.pageMood {
   justify-self: end;
-  color: var(--ink);
-  white-space: nowrap;
-}
-
-/* Below this the three cells no longer fit on one line without the middle one
-   colliding with the wordmark. The wordmark is the one that can go: it says
-   nothing the visitor needs, and the title says where they are. */
-@media (max-width: 620px) {
-  .pageMark { display: none; }
-  .pageBar { grid-template-columns: 1fr auto; }
+  /* Optically centred in a box taller than the ink beside it, exactly as in
+     the garden's corner. */
+  margin-top: -4px;
 }
 
 /* -- light ---------------------------------------------------------------

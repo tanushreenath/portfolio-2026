@@ -3,14 +3,39 @@ import type { Mood } from "../types/content";
 import styles from "./Cursor.module.css";
 
 /**
- * A butterfly. Cool and saturated against a garden that is entirely warm
- * pastel: it is the one thing on screen that is not part of the painting, and
- * it should not look like it is.
+ * A butterfly. Cool against a garden that is entirely warm pastel: it is the
+ * one thing on screen that is not part of the painting, and it should not look
+ * like it is.
+ *
+ * Drawn the way the firefly below is drawn, which is a deliberate pairing --
+ * they are the same creature at two times of day and should read as one hand.
+ * That means a light blue that opens to near-white at the wingtip rather than a
+ * saturated fill, a rim in the same family as the wing instead of a hard warm
+ * outline, and a soft halo painted into the SVG as a radial gradient. The halo
+ * is what the firefly's lantern does for it, minus the flare: a butterfly does
+ * not blink, so this one is steady and much quieter than that one.
  */
 function Butterfly({ id }: { id: string }) {
   return (
     <svg className={styles.wings} viewBox="0 0 40 34" fill="none">
       <defs>
+        {/* The halo, on the firefly's rules: four stops rather than two,
+            because a wide gradient fading straight to nothing ends on a visible
+            ring. Weaker than the firefly's -- that one is a light source and
+            this one is only catching the sun.
+
+            r=17 off a centre at y=17 is not a round number, it is the largest
+            circle that still reaches zero inside a 40x34 viewBox. Any wider and
+            the SVG clips the glow flat along the top and bottom edges, which
+            puts back the straight-edged ring the four stops are here to
+            avoid. */}
+        <radialGradient id={`${id}-halo`} gradientUnits="userSpaceOnUse" cx="20" cy="17" r="17">
+          <stop offset="0" stopColor="#e2f6ff" stopOpacity="0.5" />
+          <stop offset="0.3" stopColor="#aee2fa" stopOpacity="0.26" />
+          <stop offset="0.64" stopColor="#7fcdef" stopOpacity="0.09" />
+          <stop offset="1" stopColor="#7fcdef" stopOpacity="0" />
+        </radialGradient>
+
         {/* userSpaceOnUse, not the default. Gradient coordinates are fractions
             of the shape's own box unless this says otherwise, and these are
             viewBox numbers -- read as fractions they land twenty box-widths off
@@ -18,32 +43,67 @@ function Butterfly({ id }: { id: string }) {
             out one flat pale wash.
 
             The ramp runs from the hinge outward, which is how a wing is
-            actually pigmented: deep at the body, opening to violet at the
-            tip. */}
+            actually pigmented: deepest at the body, opening to near-white at
+            the tip.
+
+            FOUR GRADIENTS, NOT TWO, and that is the fix for a real asymmetry.
+            One pair was shared by both wings, and a gradient vector pointing
+            right means every point on the LEFT wing projects behind its first
+            stop and clamps there: the left wing was a flat deep panel while the
+            right one carried the whole ramp. Each side now runs its own vector
+            out to its own tip, so the pair is a mirror of itself. */}
         <linearGradient
-          id={`${id}-up`}
+          id={`${id}-up-l`}
+          gradientUnits="userSpaceOnUse"
+          x1="20"
+          y1="19"
+          x2="5"
+          y2="3"
+        >
+          <stop offset="0" stopColor="#3d9ac9" />
+          <stop offset="0.55" stopColor="#79cdec" />
+          <stop offset="1" stopColor="#d3f1ff" />
+        </linearGradient>
+        <linearGradient
+          id={`${id}-up-r`}
           gradientUnits="userSpaceOnUse"
           x1="20"
           y1="19"
           x2="35"
           y2="3"
         >
-          <stop offset="0" stopColor="#4b3bd4" />
-          <stop offset="0.55" stopColor="#8b3fd9" />
-          <stop offset="1" stopColor="#d6519f" />
+          <stop offset="0" stopColor="#3d9ac9" />
+          <stop offset="0.55" stopColor="#79cdec" />
+          <stop offset="1" stopColor="#d3f1ff" />
         </linearGradient>
         <linearGradient
-          id={`${id}-low`}
+          id={`${id}-low-l`}
+          gradientUnits="userSpaceOnUse"
+          x1="20"
+          y1="20"
+          x2="11"
+          y2="30"
+        >
+          <stop offset="0" stopColor="#4aa6d2" />
+          <stop offset="1" stopColor="#c2ebfd" />
+        </linearGradient>
+        <linearGradient
+          id={`${id}-low-r`}
           gradientUnits="userSpaceOnUse"
           x1="20"
           y1="20"
           x2="29"
           y2="30"
         >
-          <stop offset="0" stopColor="#5a3ad6" />
-          <stop offset="1" stopColor="#e0559a" />
+          <stop offset="0" stopColor="#4aa6d2" />
+          <stop offset="1" stopColor="#c2ebfd" />
         </linearGradient>
       </defs>
+
+      {/* Under everything, and outside the beating groups: the glow belongs to
+          the creature, not to the wings, so it must not scale with them four
+          times a second. */}
+      <circle cx="20" cy="17" r="17" fill={`url(#${id}-halo)`} />
 
       {/* Both wings are drawn out in full rather than one mirrored with a
           transform: the groups carry the beat, and an SVG transform attribute
@@ -52,41 +112,46 @@ function Butterfly({ id }: { id: string }) {
       <g className={styles.wingLeft}>
         <path
           d="M20 15C18 6 10 1 5 4C1 7 6 16.5 18.6 19.4Z"
-          fill={`url(#${id}-up)`}
-          stroke="#fff4e2"
-          strokeWidth="0.9"
+          fill={`url(#${id}-up-l)`}
+          stroke="#eaf9ff"
+          strokeOpacity="0.7"
+          strokeWidth="0.8"
         />
         <path
           d="M19.4 18.4C15 19 9 23 11 28C13 32.4 18.8 28.6 20 22.2Z"
-          fill={`url(#${id}-low)`}
-          stroke="#fff4e2"
-          strokeWidth="0.9"
+          fill={`url(#${id}-low-l)`}
+          stroke="#eaf9ff"
+          strokeOpacity="0.7"
+          strokeWidth="0.8"
         />
-        <circle cx="11.4" cy="8.6" r="1.6" fill="#fff4e2" fillOpacity="0.9" />
+        <circle cx="11.4" cy="8.6" r="1.6" fill="#f2fbff" fillOpacity="0.85" />
       </g>
 
       <g className={styles.wingRight}>
         <path
           d="M20 15C22 6 30 1 35 4C39 7 34 16.5 21.4 19.4Z"
-          fill={`url(#${id}-up)`}
-          stroke="#fff4e2"
-          strokeWidth="0.9"
+          fill={`url(#${id}-up-r)`}
+          stroke="#eaf9ff"
+          strokeOpacity="0.7"
+          strokeWidth="0.8"
         />
         <path
           d="M20.6 18.4C25 19 31 23 29 28C27 32.4 21.2 28.6 20 22.2Z"
-          fill={`url(#${id}-low)`}
-          stroke="#fff4e2"
-          strokeWidth="0.9"
+          fill={`url(#${id}-low-r)`}
+          stroke="#eaf9ff"
+          strokeOpacity="0.7"
+          strokeWidth="0.8"
         />
-        <circle cx="28.6" cy="8.6" r="1.6" fill="#fff4e2" fillOpacity="0.9" />
+        <circle cx="28.6" cy="8.6" r="1.6" fill="#f2fbff" fillOpacity="0.85" />
       </g>
 
       {/* Drawn last, over the hinge, so the wings never show a seam where they
-          meet the body as they close. */}
-      <path d="M20 9.6C21.7 12 21.9 20 20 25C18.1 20 18.3 12 20 9.6Z" fill="#2c1b45" />
+          meet the body as they close. A cool dark, like the firefly's body: a
+          silhouette against its own wings. */}
+      <path d="M20 9.6C21.7 12 21.9 20 20 25C18.1 20 18.3 12 20 9.6Z" fill="#22394d" />
       <path
         d="M19.5 10.4C18 7.6 16.2 6.2 14.6 5.8M20.5 10.4C22 7.6 23.8 6.2 25.4 5.8"
-        stroke="#2c1b45"
+        stroke="#22394d"
         strokeWidth="0.9"
         strokeLinecap="round"
       />

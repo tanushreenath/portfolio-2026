@@ -131,22 +131,40 @@
    a spinner and not a grey box -- it is the caption, shown where the picture
    will be, and it stops being visible the moment an asset is registered. */
 .pending {
+  position: relative;
+  /* Its own stacking context, so the wash below can sit behind this text
+     without falling behind the plate it is painted on. */
+  z-index: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 8px;
   height: 100%;
   padding: 24px;
-  font-size: var(--read-xs);
+  font-size: var(--type-sm);
+  font-weight: var(--weight-label);
   line-height: 1.5;
   color: var(--ink-soft);
-  /* A wash from the top corner, so an empty plate still has a light on it and
-     does not read as a flat rectangle of card. */
-  background: radial-gradient(
-    120% 90% at 12% 0%,
-    color-mix(in srgb, var(--ink) 5%, transparent) 0%,
-    transparent 62%
-  );
+}
+
+/* A wash from the top corner, so an empty plate still has a light on it and
+   does not read as a flat rectangle of card.
+ *
+ * Colour and shape kept apart for the same reason the page bar keeps them
+ * apart: a radial-gradient of ink is a background IMAGE, and an image cannot
+ * be interpolated, so this corner used to snap to night while the plate under
+ * it took the full 2.4s. Flat ink at 5%, cut by a mask that carries no colour,
+ * changes with everything else. */
+.pending::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--ink);
+  opacity: 0.05;
+  -webkit-mask-image: radial-gradient(120% 90% at 12% 0%, #000 0%, transparent 62%);
+  mask-image: radial-gradient(120% 90% at 12% 0%, #000 0%, transparent 62%);
+  transition: background-color 2.4s ease;
 }
 
 /* The one place a number is a number and not a word. Tabular, so five plates
@@ -156,8 +174,12 @@
   opacity: 0.55;
 }
 
+/* The one line of prose on a plate, so it takes the reading size the case
+   study's own paragraphs take. */
 .what {
-  font-size: var(--read-sm);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  letter-spacing: 0;
   text-wrap: pretty;
 }
 
@@ -169,7 +191,8 @@
 
 .caption {
   margin: 14px 0 0;
-  font-size: var(--read-xs);
+  font-size: var(--type-sm);
+  font-weight: var(--weight-label);
   color: var(--ink-soft);
   transition: color 2.4s ease, opacity 0.4s ease;
 }

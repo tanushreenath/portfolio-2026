@@ -10,14 +10,46 @@
   inset: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--paper);
+  /* NO BACKGROUND HERE, and this is not an oversight.
+   *
+   * The paper is painted by the canvas -- body carries it, on the same 2.4s
+   * clock -- and this element is deliberately transparent so that it shows
+   * through. Painting it here instead is the obvious thing and it is broken in
+   * a way that only appears once a case study is open: this element is the
+   * scroller, and as soon as its content is taller than the window Chrome
+   * paints the fill into a tiled scrolling layer that it does not re-raster
+   * while a colour transition runs. The measured symptom was exact -- the
+   * computed background reported mid-grey while the pixels on screen were
+   * still full daylight, so the type, the rules and the plates changed mood
+   * and the paper behind them did not, then caught up in one jump at the end.
+   *
+   * The canvas has no such problem: it is one flat surface, and it is the one
+   * thing on the page guaranteed to be repainted every frame. */
   color: var(--ink);
-  /* The page's own voice. Prose inside a case study answers to the serif; the
-     index, the numbers and every label are set in this. */
+  /* The garden's own type, at the garden's own sizes. A page here is a
+     quieter room in the same house: the index, the years and every label are
+     set in the same face the corners use, and running prose -- a case study's
+     claim and its paragraphs -- differs from them only in size. */
   font-family: var(--font-sans);
-  letter-spacing: 0;
-  transition: background 2.4s ease, color 2.4s ease;
+  letter-spacing: var(--tracking);
+  transition: color 2.4s ease;
   animation: fade-in 0.5s ease both;
+}
+
+/* ONE CLOCK FOR THE LIGHT.
+ *
+ * Every colour on a page belongs to the mood, and the mood takes 2.4 seconds.
+ * This is the floor that says so, so that a rule, a caption, a metric label and
+ * the paper behind them all arrive at night together instead of the background
+ * easing while everything printed on it cuts.
+ *
+ * `:where()` because this must lose every argument it has. It carries zero
+ * specificity, so any rule that names an element -- a plate's own background, a
+ * row's hairline, a caption -- overrides it whatever order the modules happen to
+ * be bundled in. It is a default, not a policy, and the handful of elements that
+ * declare their own transition state their colour clock inside it. */
+:where(.page *, .page *::before, .page *::after) {
+  transition: color 2.4s ease, background-color 2.4s ease, border-color 2.4s ease;
 }
 
 /* Closed, the whole page is one screen: four rows, the toadstools under them,
@@ -71,8 +103,11 @@
      the full 30px and a 640px laptop takes it down to 14 rather than the page
      losing its footer or growing a scrollbar. */
   padding: clamp(14px, 2.4vh, 30px) 0;
-  font-size: var(--read-md);
-  line-height: 1.35;
+  /* 14px, which a proportional face sets narrower than the mono this row used
+     to be -- so the three columns keep their proportions with room to spare and
+     the longest title still takes one line. */
+  font-size: var(--type-lg);
+  line-height: 1.45;
   transition: border-color 2.4s ease;
 }
 
@@ -117,7 +152,11 @@
 .rowTitle,
 .rowSubText,
 .rowYear {
-  transition: translate 0.5s var(--ease-out), color 0.4s ease;
+  /* Three clocks, one per job, and none of them shared: the nudge answers the
+     cursor, the fade answers the cursor, and the colour answers the light.
+     Colour was on 0.4s here, which meant a row's type finished changing mood
+     two seconds before the paper under it did. */
+  transition: translate 0.5s var(--ease-out), opacity 0.4s ease, color 2.4s ease;
 }
 
 .rowTitle {
@@ -160,7 +199,7 @@
   color: var(--ink);
   opacity: 0;
   translate: -6px 0;
-  transition: opacity 0.4s ease, translate 0.5s var(--ease-out);
+  transition: opacity 0.4s ease, translate 0.5s var(--ease-out), color 2.4s ease;
 }
 
 .row:hover .out,
@@ -174,9 +213,13 @@
   translate: 2px -2px;
 }
 
+/* --ink-soft is literally --ink at 82% alpha, in both moods, so saying it with
+   an opacity costs nothing and buys the year a hover that does not have to
+   share a duration with the light. */
 .rowYear {
   justify-self: end;
-  color: var(--ink-soft);
+  color: var(--ink);
+  opacity: 0.82;
   font-variant-numeric: tabular-nums;
 }
 
@@ -194,7 +237,7 @@
 
 .row:hover .rowYear,
 .toggle:focus-visible ~ .rowYear {
-  color: var(--ink);
+  opacity: 1;
 }
 
 /* -- the fold ------------------------------------------------------------
@@ -281,18 +324,29 @@
   margin: 22px 0 0;
 }
 
+/* The name of the thing you opened, and it is allowed to say so.
+ *
+ * This used to be --type-lg, the same size as the row above it, on the
+ * argument that three sizes exist site-wide and a case study is not the place
+ * to invent a fourth. What that produced was a fold with no head: the row and
+ * the title it expanded into were the same line of type twice, and nothing on
+ * screen marked the moment the index became a page. It is roughly 1.6x the row
+ * in the Portfolio 26 reference, which is where this number comes from. */
 .caseTitle {
   margin: 0;
-  font-size: var(--read-xl);
-  font-weight: 400;
+  font-size: 26px;
+  font-weight: var(--weight-body);
+  /* The three sizes carry 0.02em, which is a tracking chosen for small type.
+     At 26px the same value reads as spaced-out. */
   letter-spacing: 0;
+  line-height: 1.25;
   color: var(--ink);
 }
 
 .caseRole {
   margin: 0;
   text-align: right;
-  font-size: var(--read-md);
+  font-size: var(--type-md);
   color: var(--ink);
 }
 
@@ -301,40 +355,49 @@
 .caseWhere {
   display: block;
   margin-top: 6px;
-  font-size: var(--read-xs);
+  font-size: var(--type-sm);
+  font-weight: var(--weight-label);
   color: var(--ink-soft);
 }
 
 .caseSub {
   margin: 14px 0 0;
-  font-size: var(--read-md);
-  color: var(--ink);
+  font-size: var(--type-md);
+  color: var(--ink-soft);
 }
 
 .plates {
   margin: 34px 0 0;
 }
 
-/* The claim. Serif, and set at a measure short enough to hold two lines --
-   this is the sentence the case study is about, and it is the one place on the
-   page where the type is allowed to be a voice rather than a label. */
+/* The claim, and the paragraphs under it.
+ *
+ * NO MEASURE ON EITHER, deliberately, and this is the one rule on the page
+ * that overrides the usual typographic one. There were caps here -- 46ch on
+ * the claim and 74ch on the body -- and a cap is normally right: 90 characters
+ * is a long way for an eye to travel back. But this column is already a
+ * measure. It is 1030px wide and the rows, the hairlines and the plate strip
+ * all run its full width, so prose stopping two thirds of the way across did
+ * not read as a comfortable line length -- it read as a column that had come
+ * loose from the page around it, with a ragged edge no other element had. The
+ * text now ends where the row above it ends, which is what the Portfolio 26
+ * reference does. If the measure ever needs shortening, shorten --column and
+ * take the whole page with it. */
 .headline {
-  max-width: 46ch;
   margin: 40px 0 0;
-  font-family: var(--font-serif);
-  font-size: var(--read-lg);
-  line-height: 1.4;
+  font-family: var(--font-sans);
+  font-size: 22px;
+  line-height: 1.45;
   letter-spacing: 0;
   color: var(--ink);
   text-wrap: pretty;
 }
 
 .body {
-  max-width: 74ch;
   margin: 22px 0 0;
-  font-family: var(--font-serif);
-  font-size: var(--read-sm);
-  line-height: 1.75;
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.65;
   letter-spacing: 0;
   color: var(--ink-soft);
 }
@@ -358,7 +421,7 @@
   gap: 12px 56px;
   margin: 34px 0 0;
   padding: 0;
-  font-size: var(--read-sm);
+  font-size: var(--type-md);
 }
 
 .metric {
@@ -367,9 +430,10 @@
 
 /* The one weight on the page. A number is the only thing here that is a
    claim, and the sentence around it is the caption to the claim. */
+/* Not bolder -- nothing on this site is. What marks the number is that it is
+   a size up and holds full ink while the clause around it does not. */
 .metricValue {
-  font-size: var(--read-md);
-  font-weight: 600;
+  font-size: var(--type-lg);
   color: var(--ink);
 }
 
@@ -379,17 +443,20 @@
 
 .more {
   margin: 30px 0 0;
-  font-size: var(--read-xs);
+  font-size: var(--type-sm);
+  font-weight: var(--weight-label);
 }
 
 .moreLink {
   border-bottom-color: color-mix(in srgb, var(--ink) 30%, transparent);
-  color: var(--ink-soft);
-  transition: color 0.35s ease, border-color 0.35s ease;
+  color: var(--ink);
+  transition: opacity 0.35s ease, color 2.4s ease, border-color 2.4s ease;
 }
 
+/* Full ink at rest, like every other link on the site -- the rule underneath
+   is what darkens on hover. */
 .moreLink:hover {
-  color: var(--ink);
+  border-bottom-color: var(--ink);
 }
 
 /* -- the foot ------------------------------------------------------------- */
@@ -447,7 +514,7 @@
     display: block;
     grid-column: 1;
     color: var(--ink-soft);
-    font-size: var(--read-sm);
+    font-size: var(--type-md);
   }
 
   .out {

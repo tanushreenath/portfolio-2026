@@ -1,7 +1,6 @@
 {
   "profile": {
     "name": "Tanushree Nath",
-    "handle": "maybethismatters",
     "title": "Product Designer",
     "location": "Bengaluru, Karnataka, India",
     "welcome": {
@@ -241,7 +240,9 @@
         "title": "Work",
         "meta": "Selected projects"
       },
-      "labelSide": "above"
+      "labelSide": "right",
+      "labelLift": 0.35,
+      "labelAnchor": "toadstool-red"
     }
   ],
   "work": [
