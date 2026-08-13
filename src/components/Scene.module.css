@@ -361,6 +361,25 @@
     width: var(--stage-w);
   }
 
+  /* The night has to be as wide as the garden, for the same reason the meadow
+     does.
+   *
+   * .vignette is absolutely positioned inside .scene, and .scene is the
+   * scroller here -- so `inset: 0` sizes it to the visible box, one screen
+   * wide, while its position is anchored to the content and travels with it.
+   * The result at dusk was a hard vertical seam: dark up to one screen from
+   * the left edge of the garden, and full daylight past it, moving across the
+   * meadow as you scrolled. Nothing shows on a desktop, where there is no
+   * overflow for it to come apart over.
+   *
+   * `right: auto` because `inset: 0` set both edges, and a box with left,
+   * right and width all specified is over-constrained -- this says which two
+   * of the three are meant. */
+  .vignette {
+    right: auto;
+    width: var(--stage-w);
+  }
+
   .artwork,
   .glow {
     --stage-anchor: 50%;
